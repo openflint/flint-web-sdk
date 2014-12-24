@@ -58,13 +58,13 @@ class FlintDeviceScanner extends EventEmitter
             @devices[uniqueId] = device
             device.on 'devicetimeout', (_uniqueId) =>
                 @_removeDevice _uniqueId
-            @emit 'devicechanged', @devices
+            @emit 'devicefound', device
 
     _removeDevice: (uniqueId) ->
         if @devices[uniqueId]
             console.warn 'found device: ', @devices[uniqueId].getName()
+            @emit 'devicegone', @devices[uniqueId]
             delete @devices[uniqueId]
-            @emit 'devicechanged', @devices
 
     start: ->
         @ssdpManager?.start()
@@ -75,6 +75,9 @@ class FlintDeviceScanner extends EventEmitter
         @mdnsManager?.stop()
 
     getDeviceList: ->
-        @devices
+        dList = []
+        for _, value of @devices
+            dList.push value
+        return dList
 
 module.exports = FlintDeviceScanner
