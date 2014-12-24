@@ -100,3 +100,12 @@ deviceScanner.start();
     senderManager.on('appstop', callback);
     senderManager.stop(appInfo);
 ```
+
+## install plugin
+
+### Mac
+```
+unzip downloads/osx/npFlintPlugin.plugin.zip
+cd ~/Library/Internet\ Plug-Ins/
+ln -s downloads/osx/npFlintPlugin.plugin
+```
