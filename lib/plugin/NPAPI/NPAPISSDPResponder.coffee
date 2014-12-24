@@ -14,27 +14,15 @@
 # limitations under the License.
 #
 
-FfoxSSDPResponder = require './FfosSSDPResponder'
+EventEmitter = require 'eventemitter3'
 
-#
-# It's not a real plugin, it just create some object like a plugin does.
-#
-class FfosPlugin
+class NPAPISSDPResponder extends EventEmitter
 
-    constructor: ->
-        console.log 'create FfosPlugin'
+    constructor: (@responder) ->
+        @responder.addEventListener 'serviceFound', (url) =>
+            @emit 'serviceFound', url
 
-    createWebSocket: (url) ->
-        return new WebSocket(url)
+        @responder.addEventListener 'serviceLost', (url) =>
+            @emit 'serviceLost', url
 
-    createXMLHttpRequest: ->
-        return new XMLHttpRequest(mozSystem: true)
-
-    createSSDPResponder: (options) ->
-        return new FfoxSSDPResponder @, options
-
-    createMDNSResponder: (options) ->
-        # TODO:
-        throw 'Not Implemented'
-
-module.exports = FfosPlugin
+module.exports = NPAPISSDPResponder

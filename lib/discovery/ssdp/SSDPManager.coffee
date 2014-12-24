@@ -27,9 +27,8 @@ class SSDPManager extends EventEmitter
             st: 'urn:dial-multiscreen-org:service:dial:1'
         @ssdp = PluginLoader.getPlugin().createSSDPResponder options
 
-        # 'data' is the location of device description
-        @ssdp.addEventListener 'serviceFound', (url) =>
-#            console.error 'ssdp found: -> ', url
+        # 'url' is the location of device description
+        @ssdp.on 'serviceFound', (url) =>
             if not @devices[url]
                 # make @devices[url] non-null immediately
                 @devices[url] = url
@@ -38,8 +37,7 @@ class SSDPManager extends EventEmitter
                 if @devices[url].triggerTimer
                     @devices[url].triggerTimer()
 
-        @ssdp.addEventListener 'serviceLost', (url) =>
-#            console.error 'ssdp lost: -> ', url
+        @ssdp.on 'serviceLost', (url) =>
             if @devices[url]
                 device = @devices[url]
                 @emit 'removedevice', device

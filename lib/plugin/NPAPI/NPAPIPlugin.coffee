@@ -16,6 +16,7 @@
 
 NPAPIXhr = require './NPAPIXhr'
 NPAPIWs = require './NPAPIWs'
+NPAPISSDPResponder = require './NPAPISSDPResponder'
 
 class NPAPIPlugin
 
@@ -59,9 +60,9 @@ class NPAPIPlugin
         #   seartch(searchTarget)
         # event:
         #   'serviceFound', device-desc url
-        #   'serviceLost': unknow
+        #   'serviceLost': device-desc url
         ssdpResponder = @plugin.createSSDPResponder()
-        return ssdpResponder
+        return new NPAPISSDPResponder(ssdpResponder)
 
     createMDNSResponder: (options) ->
         throw 'Not Implemented'

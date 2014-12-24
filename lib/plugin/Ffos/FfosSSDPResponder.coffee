@@ -15,9 +15,6 @@
 #
 
 EventEmitter = require 'eventemitter3'
-#PluginLoader = require '../../plugin/PluginLoader'
-XhrWrapper = require '../../common/XhrWrapper'
-SSDPDevice = require '../../discovery/ssdp/SSDPDevice'
 
 SEARCH_INTERVAL = 5 * 1000
 
@@ -36,48 +33,38 @@ SSDP_HEADER = /^([^:]+):\s*(.*)$/
 
 SSDP_SEARCH_TARGET = 'urn:dial-multiscreen-org:service:dial:1'
 
-# TODO: to be implemented
 class FfoxSSDPResponder extends EventEmitter
 
     constructor: (@pluginLoader, @options) ->
-        @ssdpServer = null
-        @ssdpClient = null
+        @socket = null
+        @searchTimerId = null
         @started = false
 
     _init: ->
-        @ssdpServer = PluginLoader.getPlugin().createUdpServer SSDP_PORT,
-            multicast: true
-            multicastTTL: 16
-            multicastGroup: SSDP_ADDRESS
-            reuseAddress: true
-        @ssdpServer.addEventListener "data", (event) =>
-            @_onData event.read()
+        @socket = new UDPSocket
+            loopback: true
+            localPort: SSDP_PORT
+        @socket.joinMulticastGroup SSDP_ADDRESS
 
-        @ssdpClient = PluginLoader.getPlugin().createUdpClient SSDP_ADDRESS, SSDP_PORT,
-            multicast: true,
-            multicastTTL: 16
+        @socket.onmessage = (event) =>
+            msg = String.fromCharCode.apply null, new Uint8Array(event.data)
+            @_onData(msg)
 
-    start: (interval) ->
+    start: ->
         if @started
             throw 'FfosSSDPResponder already started'
-
-        if interval is undefined
-            interval = SEARCH_INTERVAL
 
         @started = true
         @_init()
 
-        @ssdpServer.listen()
-
-        interval = interval or SEARCH_INTERVAL
         @searchTimerId = setInterval (=>
-            @_search()), interval
+            @_search()), SEARCH_INTERVAL
         @_search()
 
     _search: ->
         data = SSDP_DISCOVER_PACKET
-        _data = data.replace '%SEARCH_TARGET%', @searchTarget
-        @ssdpClient.send _data
+        _data = data.replace '%SEARCH_TARGET%', SSDP_SEARCH_TARGET
+        @socket.send _data, SSDP_ADDRESS, SSDP_PORT
 
     stop: ->
         if not @started
@@ -88,14 +75,7 @@ class FfoxSSDPResponder extends EventEmitter
         if @searchTimerId
             clearInterval @searchTimerId
 
-        @ssdpServer?.close()
-        delete @ssdpServer
-        @ssdpClient?.close()
-        delete @ssdpClient
-
     _onData: (data) ->
-        # Listen for responses from specific targets. There could be more than one
-        # available.
         lines = data.toString().split '\r\n'
         firstLine = lines.shift()
         method =
@@ -106,7 +86,7 @@ class FfoxSSDPResponder extends EventEmitter
         headers = {}
         lines.forEach (line) =>
             if line.length
-                pairs = line.match(/^([^:]+):\s*(.*)$/)
+                pairs = line.match(SSDP_HEADER)
                 if pairs
                     headers[pairs[1].toLowerCase()] = pairs[2]
 
@@ -118,58 +98,14 @@ class FfoxSSDPResponder extends EventEmitter
             @_onNotify headers
 
     _onResponse: (headers) ->
-        if headers.location and @options.st is headers.st
-            @_fetchDeviceDesc headers.location
+        if headers.location and (@options.st is headers.st)
+            @emit 'serviceFound', headers.location
 
     _onNotify: (headers) ->
-        if headers.location and @options.st is headers.st
-            if headers.nts == 'ssdp:alive'
-                @_fetchDeviceDesc headers.location
-            else if headers.nts == 'ssdp:byebye'
-                @emit 'devicebyebye', headers.udn
-
-    _fetchDeviceDesc: (url) ->
-        xhr = new XhrWrapper PluginLoader
-        xhr.request 'GET', url, null, null, (statusCode, responseText) =>
-            if statusCode is 200
-                @_parseDeviceDesc responseText
-
-    _parseDeviceDesc: (data) ->
-        try
-            xml = null
-            if window.DOMParser # Standard
-                parser = new DOMParser()
-                xml = parser.parseFromString data, "text/xml"
-            else # for IE
-                xml = new ActiveXObject "Microsoft.XMLDOM"
-                xml.async = "false"
-                xml.loadXML data
-
-            urlBase = null
-            urls = xml.querySelectorAll 'URLBase'
-            if urls and urls.length > 0
-                urlBase = urls[0].innerHTML
-
-            devices = xml.querySelectorAll 'device'
-            if devices.length > 0
-                @_parseSingleDeviceDesc devices[0], urlBase
-        catch e
-            console.error e
-
-    _parseSingleDeviceDesc: (deviceNode, urlBase) ->
-        deviceType = deviceNode.querySelector('deviceType').innerHTML
-        udn = deviceNode.querySelector("UDN").innerHTML
-        friendlyName = deviceNode.querySelector('friendlyName').innerHTML
-        manufacturer = deviceNode.querySelector('manufacturer').innerHTML
-        modelName = deviceNode.querySelector('modelName').innerHTML
-        device = new SSDPDevice
-            uniqueId: udn
-            urlBase: urlBase
-            deviceType: deviceType
-            udn: udn
-            friendlyName: friendlyName
-            manufacturer: manufacturer
-            modelName: modelName
-        @emit 'devicealive', device
+        if headers.location and (@options.st is headers.nt)
+            if headers.nts is 'ssdp:alive'
+                @emit 'serviceFound', headers.location
+            else if headers.nts is 'ssdp:byebye'
+                @emit 'serviceLost', headers.location
 
 module.exports = FfoxSSDPResponder

@@ -329,85 +329,6 @@ module.exports = Platform;
 
 
 },{"./BrowserDetect":1}],6:[function(require,module,exports){
-var Base64, XhrWrapper;
-
-Base64 = require('js-base64').Base64;
-
-XhrWrapper = (function() {
-  function XhrWrapper(pluginLoader) {
-    var plugin, _callback;
-    this.proxy = false;
-    plugin = pluginLoader.getPlugin();
-    this.xhrObj = plugin.createXMLHttpRequest();
-    if (!this.xhrObj) {
-      throw 'createXMLHttpRequest failed!!!';
-    }
-    if (this.xhrObj.setOnReadyStateChangeCallback) {
-      this.proxy = true;
-    }
-    if (this.proxy) {
-      _callback = (function(_this) {
-        return function() {
-          var readyState, respondText;
-          readyState = _this.xhrObj.getReadyState();
-          if (readyState === 4) {
-            _this.xhrObj.readyState = readyState;
-            _this.xhrObj.status = _this.xhrObj.getStatus();
-            respondText = _this.xhrObj.getResponseText();
-            _this.xhrObj.responseText = Base64.decode(respondText);
-            if (_this.xhrObj.onreadystatechange) {
-              return _this.xhrObj.onreadystatechange();
-            }
-          }
-        };
-      })(this);
-      this.xhrObj.setOnReadyStateChangeCallback(_callback);
-    }
-  }
-
-  XhrWrapper.prototype.request = function(method, url, headers, data, callback) {
-    var key, value;
-    if (!this.proxy) {
-      this.xhrObj.timeout = 3 * 1000;
-    }
-    this.xhrObj.open(method, url);
-    if (headers) {
-      for (key in headers) {
-        value = headers[key];
-        this.xhrObj.setRequestHeader(key, value);
-      }
-    }
-    this.xhrObj.onreadystatechange = (function(_this) {
-      return function() {
-        if (_this.xhrObj.readyState === 4) {
-          return typeof callback === "function" ? callback(_this.xhrObj.status, _this.xhrObj.responseText) : void 0;
-        }
-      };
-    })(this);
-    if (!this.proxy) {
-      this.xhrObj.onerror = (function(_this) {
-        return function() {
-          console.error('XhrWrapper Error: ', method, ' - ', url, ' - ', data);
-          return typeof callback === "function" ? callback(-1, 'error') : void 0;
-        };
-      })(this);
-    }
-    if (data) {
-      return this.xhrObj.send(JSON.stringify(data));
-    } else {
-      return this.xhrObj.send('');
-    }
-  };
-
-  return XhrWrapper;
-
-})();
-
-module.exports = XhrWrapper;
-
-
-
-},{"js-base64":35}],7:[function(require,module,exports){
 var EventEmitter, MDNSManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -437,7 +358,7 @@ module.exports = MDNSManager;
 
 
 
-},{"eventemitter3":30}],8:[function(require,module,exports){
+},{"eventemitter3":30}],7:[function(require,module,exports){
 var FlintDevice, SSDPDevice,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -466,7 +387,7 @@ module.exports = SSDPDevice;
 
 
 
-},{"../../sender/FlintDevice":24}],9:[function(require,module,exports){
+},{"../../sender/FlintDevice":24}],8:[function(require,module,exports){
 var EventEmitter, PluginLoader, SSDPDevice, SSDPManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -487,7 +408,7 @@ SSDPManager = (function(_super) {
       st: 'urn:dial-multiscreen-org:service:dial:1'
     };
     this.ssdp = PluginLoader.getPlugin().createSSDPResponder(options);
-    this.ssdp.addEventListener('serviceFound', (function(_this) {
+    this.ssdp.on('serviceFound', (function(_this) {
       return function(url) {
         if (!_this.devices[url]) {
           _this.devices[url] = url;
@@ -499,7 +420,7 @@ SSDPManager = (function(_super) {
         }
       };
     })(this));
-    this.ssdp.addEventListener('serviceLost', (function(_this) {
+    this.ssdp.on('serviceLost', (function(_this) {
       return function(url) {
         var device;
         if (_this.devices[url]) {
@@ -593,7 +514,7 @@ module.exports = SSDPManager;
 
 
 
-},{"../../plugin/PluginLoader":23,"./SSDPDevice":8,"eventemitter3":30}],10:[function(require,module,exports){
+},{"../../plugin/PluginLoader":23,"./SSDPDevice":7,"eventemitter3":30}],9:[function(require,module,exports){
 module.exports.RTCSessionDescription = window.RTCSessionDescription ||
 	window.mozRTCSessionDescription;
 module.exports.RTCPeerConnection = window.RTCPeerConnection ||
@@ -601,7 +522,7 @@ module.exports.RTCPeerConnection = window.RTCPeerConnection ||
 module.exports.RTCIceCandidate = window.RTCIceCandidate ||
 	window.mozRTCIceCandidate;
 
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var util = require('./util');
 var EventEmitter = require('eventemitter3');
 var Negotiator = require('./negotiator');
@@ -870,7 +791,7 @@ DataConnection.prototype.handleMessage = function(message) {
 
 module.exports = DataConnection;
 
-},{"./negotiator":13,"./util":16,"eventemitter3":30,"reliable":38}],12:[function(require,module,exports){
+},{"./negotiator":12,"./util":15,"eventemitter3":30,"reliable":38}],11:[function(require,module,exports){
 var util = require('./util');
 var EventEmitter = require('eventemitter3');
 var Negotiator = require('./negotiator');
@@ -967,7 +888,7 @@ MediaConnection.prototype.close = function() {
 
 module.exports = MediaConnection;
 
-},{"./negotiator":13,"./util":16,"eventemitter3":30}],13:[function(require,module,exports){
+},{"./negotiator":12,"./util":15,"eventemitter3":30}],12:[function(require,module,exports){
 var util = require('./util');
 var RTCPeerConnection = require('./adapter').RTCPeerConnection;
 var RTCSessionDescription = require('./adapter').RTCSessionDescription;
@@ -1278,7 +1199,7 @@ Negotiator.handleCandidate = function(connection, ice) {
 
 module.exports = Negotiator;
 
-},{"./adapter":10,"./util":16}],14:[function(require,module,exports){
+},{"./adapter":9,"./util":15}],13:[function(require,module,exports){
 var util = require('./util');
 var EventEmitter = require('eventemitter3');
 var Socket = require('./socket');
@@ -1777,7 +1698,7 @@ Peer.prototype.listAllPeers = function(cb) {
 
 module.exports = Peer;
 
-},{"./dataconnection":11,"./mediaconnection":12,"./socket":15,"./util":16,"eventemitter3":30}],15:[function(require,module,exports){
+},{"./dataconnection":10,"./mediaconnection":11,"./socket":14,"./util":15,"eventemitter3":30}],14:[function(require,module,exports){
 var util = require('./util');
 var EventEmitter = require('eventemitter3');
 
@@ -1994,7 +1915,7 @@ Socket.prototype.close = function () {
 
 module.exports = Socket;
 
-},{"./util":16,"eventemitter3":30}],16:[function(require,module,exports){
+},{"./util":15,"eventemitter3":30}],15:[function(require,module,exports){
 var defaultConfig = {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }]};
 var dataCount = 1;
 
@@ -2310,7 +2231,7 @@ var util = {
 
 module.exports = util;
 
-},{"./adapter":10,"js-binarypack":36}],17:[function(require,module,exports){
+},{"./adapter":9,"js-binarypack":36}],16:[function(require,module,exports){
 var FakePlugin;
 
 FakePlugin = (function() {
@@ -2342,7 +2263,7 @@ module.exports = FakePlugin;
 
 
 
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var FfosPlugin, FfoxSSDPResponder;
 
 FfoxSSDPResponder = require('./FfosSSDPResponder');
@@ -2357,7 +2278,9 @@ FfosPlugin = (function() {
   };
 
   FfosPlugin.prototype.createXMLHttpRequest = function() {
-    return new XMLHttpRequest();
+    return new XMLHttpRequest({
+      mozSystem: true
+    });
   };
 
   FfosPlugin.prototype.createSSDPResponder = function(options) {
@@ -2376,16 +2299,12 @@ module.exports = FfosPlugin;
 
 
 
-},{"./FfosSSDPResponder":19}],19:[function(require,module,exports){
-var EventEmitter, FfoxSSDPResponder, SEARCH_INTERVAL, SSDPDevice, SSDP_ADDRESS, SSDP_DISCOVER_MX, SSDP_DISCOVER_PACKET, SSDP_HEADER, SSDP_PORT, SSDP_RESPONSE_HEADER, SSDP_SEARCH_TARGET, XhrWrapper,
+},{"./FfosSSDPResponder":18}],18:[function(require,module,exports){
+var EventEmitter, FfoxSSDPResponder, SEARCH_INTERVAL, SSDP_ADDRESS, SSDP_DISCOVER_MX, SSDP_DISCOVER_PACKET, SSDP_HEADER, SSDP_PORT, SSDP_RESPONSE_HEADER, SSDP_SEARCH_TARGET,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 EventEmitter = require('eventemitter3');
-
-XhrWrapper = require('../../common/XhrWrapper');
-
-SSDPDevice = require('../../discovery/ssdp/SSDPDevice');
 
 SEARCH_INTERVAL = 5 * 1000;
 
@@ -2409,73 +2328,56 @@ FfoxSSDPResponder = (function(_super) {
   function FfoxSSDPResponder(pluginLoader, options) {
     this.pluginLoader = pluginLoader;
     this.options = options;
-    this.ssdpServer = null;
-    this.ssdpClient = null;
+    this.socket = null;
+    this.searchTimerId = null;
     this.started = false;
   }
 
   FfoxSSDPResponder.prototype._init = function() {
-    this.ssdpServer = PluginLoader.getPlugin().createUdpServer(SSDP_PORT, {
-      multicast: true,
-      multicastTTL: 16,
-      multicastGroup: SSDP_ADDRESS,
-      reuseAddress: true
+    this.socket = new UDPSocket({
+      loopback: true,
+      localPort: SSDP_PORT
     });
-    this.ssdpServer.addEventListener("data", (function(_this) {
+    this.socket.joinMulticastGroup(SSDP_ADDRESS);
+    return this.socket.onmessage = (function(_this) {
       return function(event) {
-        return _this._onData(event.read());
+        var msg;
+        msg = String.fromCharCode.apply(null, new Uint8Array(event.data));
+        return _this._onData(msg);
       };
-    })(this));
-    return this.ssdpClient = PluginLoader.getPlugin().createUdpClient(SSDP_ADDRESS, SSDP_PORT, {
-      multicast: true,
-      multicastTTL: 16
-    });
+    })(this);
   };
 
-  FfoxSSDPResponder.prototype.start = function(interval) {
+  FfoxSSDPResponder.prototype.start = function() {
     if (this.started) {
       throw 'FfosSSDPResponder already started';
     }
-    if (interval === void 0) {
-      interval = SEARCH_INTERVAL;
-    }
     this.started = true;
     this._init();
-    this.ssdpServer.listen();
-    interval = interval || SEARCH_INTERVAL;
     this.searchTimerId = setInterval(((function(_this) {
       return function() {
         return _this._search();
       };
-    })(this)), interval);
+    })(this)), SEARCH_INTERVAL);
     return this._search();
   };
 
   FfoxSSDPResponder.prototype._search = function() {
     var data, _data;
     data = SSDP_DISCOVER_PACKET;
-    _data = data.replace('%SEARCH_TARGET%', this.searchTarget);
-    return this.ssdpClient.send(_data);
+    _data = data.replace('%SEARCH_TARGET%', SSDP_SEARCH_TARGET);
+    return this.socket.send(_data, SSDP_ADDRESS, SSDP_PORT);
   };
 
   FfoxSSDPResponder.prototype.stop = function() {
-    var _ref, _ref1;
     if (!this.started) {
       console.warn('FfosSSDPResponder is not started');
       return;
     }
     this.started = false;
     if (this.searchTimerId) {
-      clearInterval(this.searchTimerId);
+      return clearInterval(this.searchTimerId);
     }
-    if ((_ref = this.ssdpServer) != null) {
-      _ref.close();
-    }
-    delete this.ssdpServer;
-    if ((_ref1 = this.ssdpClient) != null) {
-      _ref1.close();
-    }
-    return delete this.ssdpClient;
   };
 
   FfoxSSDPResponder.prototype._onData = function(data) {
@@ -2488,7 +2390,7 @@ FfoxSSDPResponder = (function(_super) {
       return function(line) {
         var pairs;
         if (line.length) {
-          pairs = line.match(/^([^:]+):\s*(.*)$/);
+          pairs = line.match(SSDP_HEADER);
           if (pairs) {
             return headers[pairs[1].toLowerCase()] = pairs[2];
           }
@@ -2505,77 +2407,19 @@ FfoxSSDPResponder = (function(_super) {
   };
 
   FfoxSSDPResponder.prototype._onResponse = function(headers) {
-    if (headers.location && this.options.st === headers.st) {
-      return this._fetchDeviceDesc(headers.location);
+    if (headers.location && (this.options.st === headers.st)) {
+      return this.emit('serviceFound', headers.location);
     }
   };
 
   FfoxSSDPResponder.prototype._onNotify = function(headers) {
-    if (headers.location && this.options.st === headers.st) {
+    if (headers.location && (this.options.st === headers.nt)) {
       if (headers.nts === 'ssdp:alive') {
-        return this._fetchDeviceDesc(headers.location);
+        return this.emit('serviceFound', headers.location);
       } else if (headers.nts === 'ssdp:byebye') {
-        return this.emit('devicebyebye', headers.udn);
+        return this.emit('serviceLost', headers.location);
       }
     }
-  };
-
-  FfoxSSDPResponder.prototype._fetchDeviceDesc = function(url) {
-    var xhr;
-    xhr = new XhrWrapper(PluginLoader);
-    return xhr.request('GET', url, null, null, (function(_this) {
-      return function(statusCode, responseText) {
-        if (statusCode === 200) {
-          return _this._parseDeviceDesc(responseText);
-        }
-      };
-    })(this));
-  };
-
-  FfoxSSDPResponder.prototype._parseDeviceDesc = function(data) {
-    var devices, e, parser, urlBase, urls, xml;
-    try {
-      xml = null;
-      if (window.DOMParser) {
-        parser = new DOMParser();
-        xml = parser.parseFromString(data, "text/xml");
-      } else {
-        xml = new ActiveXObject("Microsoft.XMLDOM");
-        xml.async = "false";
-        xml.loadXML(data);
-      }
-      urlBase = null;
-      urls = xml.querySelectorAll('URLBase');
-      if (urls && urls.length > 0) {
-        urlBase = urls[0].innerHTML;
-      }
-      devices = xml.querySelectorAll('device');
-      if (devices.length > 0) {
-        return this._parseSingleDeviceDesc(devices[0], urlBase);
-      }
-    } catch (_error) {
-      e = _error;
-      return console.error(e);
-    }
-  };
-
-  FfoxSSDPResponder.prototype._parseSingleDeviceDesc = function(deviceNode, urlBase) {
-    var device, deviceType, friendlyName, manufacturer, modelName, udn;
-    deviceType = deviceNode.querySelector('deviceType').innerHTML;
-    udn = deviceNode.querySelector("UDN").innerHTML;
-    friendlyName = deviceNode.querySelector('friendlyName').innerHTML;
-    manufacturer = deviceNode.querySelector('manufacturer').innerHTML;
-    modelName = deviceNode.querySelector('modelName').innerHTML;
-    device = new SSDPDevice({
-      uniqueId: udn,
-      urlBase: urlBase,
-      deviceType: deviceType,
-      udn: udn,
-      friendlyName: friendlyName,
-      manufacturer: manufacturer,
-      modelName: modelName
-    });
-    return this.emit('devicealive', device);
   };
 
   return FfoxSSDPResponder;
@@ -2586,12 +2430,14 @@ module.exports = FfoxSSDPResponder;
 
 
 
-},{"../../common/XhrWrapper":6,"../../discovery/ssdp/SSDPDevice":8,"eventemitter3":30}],20:[function(require,module,exports){
-var NPAPIPlugin, NPAPIWs, NPAPIXhr;
+},{"eventemitter3":30}],19:[function(require,module,exports){
+var NPAPIPlugin, NPAPISSDPResponder, NPAPIWs, NPAPIXhr;
 
 NPAPIXhr = require('./NPAPIXhr');
 
 NPAPIWs = require('./NPAPIWs');
+
+NPAPISSDPResponder = require('./NPAPISSDPResponder');
 
 NPAPIPlugin = (function() {
   var PLUGIN_MIME_TYPE, PLUGIN_NAME;
@@ -2640,7 +2486,7 @@ NPAPIPlugin = (function() {
   NPAPIPlugin.prototype.createSSDPResponder = function(options) {
     var ssdpResponder;
     ssdpResponder = this.plugin.createSSDPResponder();
-    return ssdpResponder;
+    return new NPAPISSDPResponder(ssdpResponder);
   };
 
   NPAPIPlugin.prototype.createMDNSResponder = function(options) {
@@ -2655,7 +2501,39 @@ module.exports = NPAPIPlugin;
 
 
 
-},{"./NPAPIWs":21,"./NPAPIXhr":22}],21:[function(require,module,exports){
+},{"./NPAPISSDPResponder":20,"./NPAPIWs":21,"./NPAPIXhr":22}],20:[function(require,module,exports){
+var EventEmitter, NPAPISSDPResponder,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+EventEmitter = require('eventemitter3');
+
+NPAPISSDPResponder = (function(_super) {
+  __extends(NPAPISSDPResponder, _super);
+
+  function NPAPISSDPResponder(responder) {
+    this.responder = responder;
+    this.responder.addEventListener('serviceFound', (function(_this) {
+      return function(url) {
+        return _this.emit('serviceFound', url);
+      };
+    })(this));
+    this.responder.addEventListener('serviceLost', (function(_this) {
+      return function(url) {
+        return _this.emit('serviceLost', url);
+      };
+    })(this));
+  }
+
+  return NPAPISSDPResponder;
+
+})(EventEmitter);
+
+module.exports = NPAPISSDPResponder;
+
+
+
+},{"eventemitter3":30}],21:[function(require,module,exports){
 var NPAPIWs;
 
 NPAPIWs = (function() {
@@ -2851,7 +2729,7 @@ module.exports = PluginLoader;
 
 
 
-},{"../common/Platform":5,"./FakePlugin":17,"./Ffos/FfosPlugin":18,"./NPAPI/NPAPIPlugin":20}],24:[function(require,module,exports){
+},{"../common/Platform":5,"./FakePlugin":16,"./Ffos/FfosPlugin":17,"./NPAPI/NPAPIPlugin":19}],24:[function(require,module,exports){
 var EventEmitter, FlintDevice,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3036,7 +2914,7 @@ module.exports = FlintDeviceScanner;
 
 
 
-},{"../discovery/mdns/MDNSManager":7,"../discovery/ssdp/SSDPManager":9,"./FlintDevice":24,"eventemitter3":30}],26:[function(require,module,exports){
+},{"../discovery/mdns/MDNSManager":6,"../discovery/ssdp/SSDPManager":8,"./FlintDevice":24,"eventemitter3":30}],26:[function(require,module,exports){
 var EventEmitter, FlintConstants, FlintSenderManager, Peer, PluginLoader, SenderMessageBus, SenderMessageChannel,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3517,7 +3395,7 @@ module.exports = FlintSenderManager;
 
 
 
-},{"../common/FlintConstants":2,"../peerjs/peer":14,"../plugin/PluginLoader":23,"./SenderMessageBus":27,"./SenderMessageChannel":28,"eventemitter3":30}],27:[function(require,module,exports){
+},{"../common/FlintConstants":2,"../peerjs/peer":13,"../plugin/PluginLoader":23,"./SenderMessageBus":27,"./SenderMessageChannel":28,"eventemitter3":30}],27:[function(require,module,exports){
 var MessageBus, SenderMessageBus,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
