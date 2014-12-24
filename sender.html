@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="flingApp">
+<head>
+    <title>Sender Test</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <script src="out/flint_sender_sdk.js"></script>
+</head>
+
+<body>
+
+<script>
+    var appInfo = {
+        appUrl: 'http://www.baidu.com/',
+        useIpc: true, //false,
+        maxInactive: 15000
+    };
+
+    var deviceManager = new FlintSenderManager("~1234567890", 'http://127.0.0.1:9431', true);
+    deviceManager.on('appstate', function (result, state, additionaldata) {
+        console.log('result = ', result);
+        console.log('state = ', state);
+        console.log('additionaldata = ', additionaldata);
+    });
+    deviceManager.on('applaunch', function (result) {
+        console.log('launch -> ', result);
+    });
+    deviceManager.launch(appInfo);
+</script>
+</body>
+</html>
