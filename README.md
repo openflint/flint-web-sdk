@@ -109,3 +109,8 @@ unzip downloads/osx/npFlintPlugin.plugin.zip
 cd ~/Library/Internet\ Plug-Ins/
 ln -s downloads/osx/npFlintPlugin.plugin
 ```
+
+### Linux
+```
+cp downloads/linux/npFlintPlugin.so ~/.mozilla/plugins/
+```
