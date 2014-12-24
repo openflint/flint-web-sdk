@@ -1,7 +1,14 @@
 # How to use SDK
 
+> please refer to `https://github.com/openflint/flint-web-sdk/tree/master/doc/receiver/zh` and `https://github.com/openflint/flint-web-sdk/tree/master/doc/sender/zh` for more information.
+
 ## Receiver side
 ```
+// include
+<script src="//openflint.github.io/flint-web-sdk/out/flint_receiver_sdk.js"></script>
+// or
+<script src="//openflint.github.io/flint-web-sdk/out/flint_receiver_sdk.min.js"></script>
+
 // create FlintReceiverManager
     var receiverManager = new FlintReceiverManager(
             appid /* application ID */
@@ -28,10 +35,27 @@
 
 ## Sender side
 ```
+// include
+<script src="//openflint.github.io/flint-web-sdk/out/flint_sender_sdk.js"></script>
+// or
+<script src="//openflint.github.io/flint-web-sdk/out/flint_sender_sdk.min.js"></script>
+
+// find a FlintDevice
+var deviceScanner = new FlintDeviceScanner();
+var device = null;
+
+var deviceList = deviceScanner.getDeviceList();
+// or
+deviceScanner.on('devicefound', function(_device) {
+    device = _device;
+});
+
+deviceScanner.start();
+
 // create FlintSenderManager
     var senderManager = new FlintSenderManager(
             appid /* application ID */,
-            flintServiceUrl /* Flint Service url */,
+            device.getUrlBase() /* Flint Service url */,
             keepHeartbeat /* boolean, keep heartbeat with FLint Service */
         );
 
