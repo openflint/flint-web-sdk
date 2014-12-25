@@ -371,6 +371,9 @@ SSDPDevice = (function(_super) {
   function SSDPDevice(deviceDesc) {
     SSDPDevice.__super__.constructor.apply(this, arguments);
     this.urlBase = deviceDesc.urlBase;
+    if (this.urlBase.slice(-5) !== ':9431') {
+      this.urlBase += ':9431';
+    }
     this.friendlyName = deviceDesc.friendlyName;
     this.uniqueId = deviceDesc.udn;
   }
@@ -472,8 +475,10 @@ SSDPManager = (function(_super) {
       }
       urlBase = null;
       urls = xml.querySelectorAll('URLBase');
+      console.error('from -> ', url, ' &&& get url base -------------> ', urls);
       if (urls && urls.length > 0) {
         urlBase = urls[0].innerHTML;
+        console.error('from -> ', url, ' &&& get url base -------------> ', urlBase);
       }
       devices = xml.querySelectorAll('device');
       if (devices.length > 0) {

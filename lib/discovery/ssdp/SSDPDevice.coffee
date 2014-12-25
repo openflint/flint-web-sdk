@@ -21,7 +21,12 @@ class SSDPDevice extends FlintDevice
     constructor: (deviceDesc) ->
         super
         # set values
+
         @urlBase = deviceDesc.urlBase
+
+        if @urlBase.slice(-5) isnt ':9431'
+            @urlBase += ':9431'
+
         @friendlyName = deviceDesc.friendlyName
         # make the udn as the uniqueId of SSDP device
         @uniqueId = deviceDesc.udn
