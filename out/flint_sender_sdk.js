@@ -2984,7 +2984,6 @@ FlintSenderManager = (function(_super) {
     this.heartbeatTimerId = null;
     this.defMessageChannel = this._createMessageChannel();
     this.messageBusList = {};
-    this.defPeer = null;
   }
 
   FlintSenderManager.prototype.setServiceUrl = function(urlBase) {
@@ -3363,54 +3362,47 @@ FlintSenderManager = (function(_super) {
   };
 
   FlintSenderManager.prototype.createPeer = function() {
-    if (this.defPeer) {
-      return this.defPeer;
-    }
-    this.defPeer = new Peer({
-      host: this.host,
-      port: '9433'
-    });
-    return this.defPeer;
-  };
-
-  FlintSenderManager.prototype.connectReceiverPeer = function(options) {
-    if (!this.defPeer) {
-      this.createPeer();
-    }
-    if (this.additionalData['peerId']) {
-      this.defPeer.connect(this.additionalData['peerId'], options);
-    } else {
-      this.once('peerId' + 'available', (function(_this) {
-        return function(peerId) {
-          return _this.defPeer.connect(peerId, options);
-        };
-      })(this));
-    }
-    return this.defPeer;
-  };
-
-  FlintSenderManager.prototype.callReceiverPeer = function(stream, options) {
-    if (!this.defPeer) {
-      this.createPeer();
-    }
-    if (this.additionalData['peerId']) {
-      this.defPeer.call(this.additionalData['peerId'], stream, options);
-    } else {
-      this.once('peerId' + 'available', (function(_this) {
-        return function(peerId) {
-          return _this.defPeer.call(peerId, stream, options);
-        };
-      })(this));
-    }
-    return this.defPeer;
-  };
-
-  FlintSenderManager.prototype.createCustomPeer = function() {
     var peer;
     peer = new Peer({
       host: this.host,
       port: '9433'
     });
+    return peer;
+  };
+
+  FlintSenderManager.prototype.connectReceiverPeer = function(options) {
+    var peer;
+    peer = new Peer({
+      host: this.host,
+      port: '9433'
+    });
+    if (this.additionalData['peerId']) {
+      peer.connect(this.additionalData['peerId'], options);
+    } else {
+      this.once('peerId' + 'available', (function(_this) {
+        return function(peerId) {
+          return peer.connect(peerId, options);
+        };
+      })(this));
+    }
+    return peer;
+  };
+
+  FlintSenderManager.prototype.callReceiverPeer = function(stream, options) {
+    var peer;
+    peer = new Peer({
+      host: this.host,
+      port: '9433'
+    });
+    if (this.additionalData['peerId']) {
+      peer.call(this.additionalData['peerId'], stream, options);
+    } else {
+      this.once('peerId' + 'available', (function(_this) {
+        return function(peerId) {
+          return peer.call(peerId, stream, options);
+        };
+      })(this));
+    }
     return peer;
   };
 

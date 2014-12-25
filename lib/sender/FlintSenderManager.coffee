@@ -44,7 +44,6 @@ class FlintSenderManager extends EventEmitter
 
         @defMessageChannel = @_createMessageChannel()
         @messageBusList = {}
-        @defPeer = null
 
     setServiceUrl: (@urlBase) ->
         @serviceUrl = @urlBase + '/apps/' + @appId
@@ -336,37 +335,31 @@ class FlintSenderManager extends EventEmitter
         return @messageBusList
 
     createPeer: ->
-        if @defPeer
-            return @defPeer
-        @defPeer = new Peer
-            host: @host
-            port: '9433'
-        return @defPeer
-
-    connectReceiverPeer: (options) ->
-        if not @defPeer
-            @createPeer()
-        if @additionalData['peerId']
-            @defPeer.connect @additionalData['peerId'], options
-        else
-            @.once 'peerId' + 'available', (peerId) =>
-                @defPeer.connect peerId, options
-        return @defPeer
-
-    callReceiverPeer: (stream, options) ->
-        if not @defPeer
-            @createPeer()
-        if @additionalData['peerId']
-            @defPeer.call @additionalData['peerId'], stream, options
-        else
-            @.once 'peerId' + 'available', (peerId) =>
-                @defPeer.call peerId, stream, options
-        return @defPeer
-
-    createCustomPeer: ->
         peer = new Peer
             host: @host
             port: '9433'
+        return peer
+
+    connectReceiverPeer: (options) ->
+        peer = new Peer
+            host: @host
+            port: '9433'
+        if @additionalData['peerId']
+            peer.connect @additionalData['peerId'], options
+        else
+            @.once 'peerId' + 'available', (peerId) =>
+                peer.connect peerId, options
+        return peer
+
+    callReceiverPeer: (stream, options) ->
+        peer = new Peer
+            host: @host
+            port: '9433'
+        if @additionalData['peerId']
+            peer.call @additionalData['peerId'], stream, options
+        else
+            @.once 'peerId' + 'available', (peerId) =>
+                peer.call peerId, stream, options
         return peer
 
     _clean: ->
