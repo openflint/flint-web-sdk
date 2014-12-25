@@ -2525,6 +2525,14 @@ NPAPISSDPResponder = (function(_super) {
     })(this));
   }
 
+  NPAPISSDPResponder.prototype.start = function() {
+    return this.responder.start();
+  };
+
+  NPAPISSDPResponder.prototype.stop = function() {
+    return this.responder.stop();
+  };
+
   return NPAPISSDPResponder;
 
 })(EventEmitter);

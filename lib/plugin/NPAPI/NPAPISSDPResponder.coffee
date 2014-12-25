@@ -25,4 +25,10 @@ class NPAPISSDPResponder extends EventEmitter
         @responder.addEventListener 'serviceLost', (url) =>
             @emit 'serviceLost', url
 
+    start: ->
+        @responder.start()
+
+    stop: ->
+        @responder.stop()
+
 module.exports = NPAPISSDPResponder
