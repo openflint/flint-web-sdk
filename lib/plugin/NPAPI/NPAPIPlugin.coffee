@@ -23,7 +23,7 @@ class NPAPIPlugin
     PLUGIN_NAME = 'flintplugin'
     PLUGIN_MIME_TYPE = 'application/x-flintplugin'
 
-    constructor: ->
+    constructor: (@isReciever) ->
         @plugin = null
         len = navigator.mimeTypes.length
         i = 0
@@ -43,14 +43,20 @@ class NPAPIPlugin
             throw 'cannot load NPAPI plugin: ' + PLUGIN_NAME
 
     createWebSocket: (url) ->
-        console.log 'create NPAPI websocket: ', url
-        wsObj = @plugin.createWebSocket url
-        return new NPAPIWs(wsObj, url)
+        if @isReciever
+            return new WebSocket(url)
+        else
+            console.log 'create NPAPI websocket: ', url
+            wsObj = @plugin.createWebSocket url
+            return new NPAPIWs(wsObj, url)
 
     createXMLHttpRequest: ->
-        console.log 'create NPAPI XMLHttpRequest: '
-        xhrObj = @plugin.createXMLHttpRequest()
-        return new NPAPIXhr(xhrObj)
+        if @isReciever
+            return new XMLHttpRequest()
+        else
+            console.log 'create NPAPI XMLHttpRequest: '
+            xhrObj = @plugin.createXMLHttpRequest()
+            return new NPAPIXhr(xhrObj)
 
     createSSDPResponder: (options) ->
         # TODO:

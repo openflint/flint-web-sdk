@@ -475,10 +475,8 @@ SSDPManager = (function(_super) {
       }
       urlBase = null;
       urls = xml.querySelectorAll('URLBase');
-      console.error('from -> ', url, ' &&& get url base -------------> ', urls);
       if (urls && urls.length > 0) {
         urlBase = urls[0].innerHTML;
-        console.error('from -> ', url, ' &&& get url base -------------> ', urlBase);
       }
       devices = xml.querySelectorAll('device');
       if (devices.length > 0) {
@@ -1706,6 +1704,7 @@ module.exports = Peer;
 },{"./dataconnection":10,"./mediaconnection":11,"./socket":14,"./util":15,"eventemitter3":30}],14:[function(require,module,exports){
 var util = require('./util');
 var EventEmitter = require('eventemitter3');
+var PluginLoader = require('../plugin/PluginLoader');
 
 /**
  * An abstraction on top of WebSockets and XHR streaming to provide fastest
@@ -1749,8 +1748,7 @@ Socket.prototype._startWebSocket = function (id) {
         return;
     }
 
-    // this._socket = new WebSocket(this._wsUrl);
-    this._socket = new WebSocketAdapter(this._wsUrl);
+    this._socket = new PluginLoader.getPlugin().createWebSocket(this._wsUrl);
 
     this._socket.onmessage = function (event) {
         try {
@@ -1920,7 +1918,7 @@ Socket.prototype.close = function () {
 
 module.exports = Socket;
 
-},{"./util":15,"eventemitter3":30}],15:[function(require,module,exports){
+},{"../plugin/PluginLoader":23,"./util":15,"eventemitter3":30}],15:[function(require,module,exports){
 var defaultConfig = {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }]};
 var dataCount = 1;
 
@@ -2240,7 +2238,8 @@ module.exports = util;
 var FakePlugin;
 
 FakePlugin = (function() {
-  function FakePlugin() {
+  function FakePlugin(isReciever) {
+    this.isReciever = isReciever;
     console.log('create FakePlugin');
   }
 
@@ -2274,7 +2273,8 @@ var FfosPlugin, FfoxSSDPResponder;
 FfoxSSDPResponder = require('./FfosSSDPResponder');
 
 FfosPlugin = (function() {
-  function FfosPlugin() {
+  function FfosPlugin(isReciever) {
+    this.isReciever = isReciever;
     console.log('create FfosPlugin');
   }
 
@@ -2451,8 +2451,9 @@ NPAPIPlugin = (function() {
 
   PLUGIN_MIME_TYPE = 'application/x-flintplugin';
 
-  function NPAPIPlugin() {
+  function NPAPIPlugin(isReciever) {
     var i, len, plugin;
+    this.isReciever = isReciever;
     this.plugin = null;
     len = navigator.mimeTypes.length;
     i = 0;
@@ -2476,16 +2477,24 @@ NPAPIPlugin = (function() {
 
   NPAPIPlugin.prototype.createWebSocket = function(url) {
     var wsObj;
-    console.log('create NPAPI websocket: ', url);
-    wsObj = this.plugin.createWebSocket(url);
-    return new NPAPIWs(wsObj, url);
+    if (this.isReciever) {
+      return new WebSocket(url);
+    } else {
+      console.log('create NPAPI websocket: ', url);
+      wsObj = this.plugin.createWebSocket(url);
+      return new NPAPIWs(wsObj, url);
+    }
   };
 
   NPAPIPlugin.prototype.createXMLHttpRequest = function() {
     var xhrObj;
-    console.log('create NPAPI XMLHttpRequest: ');
-    xhrObj = this.plugin.createXMLHttpRequest();
-    return new NPAPIXhr(xhrObj);
+    if (this.isReciever) {
+      return new XMLHttpRequest();
+    } else {
+      console.log('create NPAPI XMLHttpRequest: ');
+      xhrObj = this.plugin.createXMLHttpRequest();
+      return new NPAPIXhr(xhrObj);
+    }
   };
 
   NPAPIPlugin.prototype.createSSDPResponder = function(options) {
@@ -2709,29 +2718,35 @@ PluginLoader = (function() {
 
   PluginLoader.plugin = null;
 
+  PluginLoader.isReceiver = false;
+
   PluginLoader.getPlugin = function() {
     var platform;
     if (PluginLoader.DEBUG) {
-      PluginLoader.plugin = new FakePlugin();
+      PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver);
     }
     if (!PluginLoader.plugin) {
       platform = Platform.getPlatform();
       console.info('Platform is : ', platform.browser);
       switch (platform.browser) {
         case 'ffos':
-          PluginLoader.plugin = new FfosPlugin();
+          PluginLoader.plugin = new FfosPlugin(PluginLoader.isReceiver);
           break;
         case 'firefox':
         case 'chrome':
         case 'safari':
         case 'msie':
-          PluginLoader.plugin = new NPAPIPlugin();
+          PluginLoader.plugin = new NPAPIPlugin(PluginLoader.isReceiver);
           break;
         default:
-          PluginLoader.plugin = new FakePlugin();
+          PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver);
       }
     }
     return PluginLoader.plugin;
+  };
+
+  PluginLoader.setItAsReceiver = function() {
+    return PluginLoader.isReceiver = true;
   };
 
   return PluginLoader;
@@ -3359,27 +3374,35 @@ FlintSenderManager = (function(_super) {
   };
 
   FlintSenderManager.prototype.connectReceiverPeer = function(options) {
-    if (!this.additionalData['peerId']) {
-      return this.defPeer.connect(this.additionalData['peerId'], options);
+    if (!this.defPeer) {
+      this.createPeer();
+    }
+    if (this.additionalData['peerId']) {
+      this.defPeer.connect(this.additionalData['peerId'], options);
     } else {
-      return this.once('peerId' + 'available', (function(_this) {
+      this.once('peerId' + 'available', (function(_this) {
         return function(peerId) {
           return _this.defPeer.connect(peerId, options);
         };
       })(this));
     }
+    return this.defPeer;
   };
 
   FlintSenderManager.prototype.callReceiverPeer = function(stream, options) {
-    if (!this.additionalData['peerId']) {
-      return this.defPeer.call(this.additionalData['peerId'], stream, options);
+    if (!this.defPeer) {
+      this.createPeer();
+    }
+    if (this.additionalData['peerId']) {
+      this.defPeer.call(this.additionalData['peerId'], stream, options);
     } else {
-      return this.once('peerId' + 'available', (function(_this) {
+      this.once('peerId' + 'available', (function(_this) {
         return function(peerId) {
           return _this.defPeer.call(peerId, stream, options);
         };
       })(this));
     }
+    return this.defPeer;
   };
 
   FlintSenderManager.prototype.createCustomPeer = function() {

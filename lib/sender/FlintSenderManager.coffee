@@ -344,18 +344,24 @@ class FlintSenderManager extends EventEmitter
         return @defPeer
 
     connectReceiverPeer: (options) ->
-        if not @additionalData['peerId']
+        if not @defPeer
+            @createPeer()
+        if @additionalData['peerId']
             @defPeer.connect @additionalData['peerId'], options
         else
             @.once 'peerId' + 'available', (peerId) =>
                 @defPeer.connect peerId, options
+        return @defPeer
 
     callReceiverPeer: (stream, options) ->
-        if not @additionalData['peerId']
+        if not @defPeer
+            @createPeer()
+        if @additionalData['peerId']
             @defPeer.call @additionalData['peerId'], stream, options
         else
             @.once 'peerId' + 'available', (peerId) =>
                 @defPeer.call peerId, stream, options
+        return @defPeer
 
     createCustomPeer: ->
         peer = new Peer

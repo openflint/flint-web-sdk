@@ -21,7 +21,7 @@ FfoxSSDPResponder = require './FfosSSDPResponder'
 #
 class FfosPlugin
 
-    constructor: ->
+    constructor: (@isReciever) ->
         console.log 'create FfosPlugin'
 
     createWebSocket: (url) ->

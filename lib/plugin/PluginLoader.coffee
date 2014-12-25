@@ -25,9 +25,11 @@ class PluginLoader
 
     @plugin = null
 
+    @isReceiver = false
+
     @getPlugin: ->
         if PluginLoader.DEBUG
-            PluginLoader.plugin = new FakePlugin()
+            PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver)
 
         if not PluginLoader.plugin
             # load order:
@@ -39,12 +41,15 @@ class PluginLoader
             console.info 'Platform is : ', platform.browser
             switch platform.browser
                 when 'ffos'
-                    PluginLoader.plugin = new FfosPlugin()
+                    PluginLoader.plugin = new FfosPlugin(PluginLoader.isReceiver)
                 when 'firefox', 'chrome', 'safari', 'msie'
-                    PluginLoader.plugin = new NPAPIPlugin()
+                    PluginLoader.plugin = new NPAPIPlugin(PluginLoader.isReceiver)
                 else
-                    PluginLoader.plugin = new FakePlugin()
+                    PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver)
 
         return PluginLoader.plugin
+
+    @setItAsReceiver: ->
+        PluginLoader.isReceiver = true
 
 module.exports = PluginLoader

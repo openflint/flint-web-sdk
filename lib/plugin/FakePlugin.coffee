@@ -19,7 +19,7 @@
 #
 class FakePlugin
 
-    constructor: ->
+    constructor: (@isReciever)->
         console.log 'create FakePlugin'
 
     createWebSocket: (url) ->

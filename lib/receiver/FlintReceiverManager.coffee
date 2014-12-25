@@ -20,10 +20,13 @@ MessageChannel = require '../common/MessageChannel'
 ReceiverMessageBus = require './ReceiverMessageBus'
 FlintConstants = require '../common/FlintConstants'
 Peer = require '../peerjs/peer'
+PluginLoader = require '../plugin/PluginLoader'
 
 class FlintReceiverManager extends EventEmitter
 
     constructor: (@appId) ->
+        PluginLoader.setItAsReceiver()
+
         if not @appId
             throw 'illegal APP ID'
         else
@@ -44,9 +47,6 @@ class FlintReceiverManager extends EventEmitter
         if @_isStarted()
             console.warn 'FlintReceiverManager is already opened'
             return
-
-        # open MessageChannel before opening IPC
-#        @defMessageChannel.open()
 
         @ipcChannel = new MessageChannel 'ipc', @ipcAddress
         @ipcChannel.on 'open', (event) =>
@@ -194,6 +194,11 @@ class FlintReceiverManager extends EventEmitter
                 port: '9433'
             @defPeer.on 'open', (peerId) =>
                 @defPeerId = peerId
+                additionalData = @_joinAdditionalData()
+                if additionalData
+                    @_ipcSend
+                        type: 'additionaldata'
+                        additionaldata: additionalData
         return @defPeer
 
     createCustomPeer: ->
