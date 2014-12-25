@@ -2603,8 +2603,8 @@ FlintReceiverManager = (function(_super) {
     this.FlintServerIp = '127.0.0.1';
     this.defMessageChannel = this._createMessageChannel();
     this.messageBusList = {};
-    this.defPeer = null;
-    this.defPeerId = null;
+    this.dataPeerId = null;
+    this.mediaPeerId = null;
     this.cusAdditionalData = null;
   }
 
@@ -2655,23 +2655,13 @@ FlintReceiverManager = (function(_super) {
   };
 
   FlintReceiverManager.prototype._onIpcMessage = function(data) {
-    var additionalData;
     switch (data.type) {
       case 'startHeartbeat':
         return console.info('receiver ready to start heartbeat!!!');
       case 'registerok':
         console.info('receiver register done!!!');
         this.FlintServerIp = data['service_info']['ip'][0];
-        additionalData = this._joinAdditionalData();
-        if (additionalData) {
-          return this._ipcSend({
-            type: 'additionaldata',
-            additionaldata: additionalData
-          });
-        } else {
-          return console.warn('no additionaldata need to send');
-        }
-        break;
+        return this._sendAdditionalData();
       case 'heartbeat':
         if (data.heartbeat === 'ping') {
           return this._ipcSend({
@@ -2699,9 +2689,13 @@ FlintReceiverManager = (function(_super) {
   };
 
   FlintReceiverManager.prototype.setAdditionalData = function(additionaldata) {
-    var additionalData;
     console.info("set custom additionaldata: ", additionaldata);
     this.cusAdditionalData = additionaldata;
+    return this._sendAdditionalData();
+  };
+
+  FlintReceiverManager.prototype._sendAdditionalData = function() {
+    var additionalData;
     additionalData = this._joinAdditionalData();
     if (additionalData) {
       return this._ipcSend({
@@ -2714,17 +2708,19 @@ FlintReceiverManager = (function(_super) {
   };
 
   FlintReceiverManager.prototype._joinAdditionalData = function() {
-    var additionalData, key, value, _ref;
+    var additionalData;
     additionalData = {};
-    additionalData[this.defMessageChannel.getName()] = 'ws://' + this.FlintServerIp + ':9439/channels/' + this.defMessageChannel.getName();
-    _ref = this.cusAdditionalData;
-    for (key in _ref) {
-      if (!__hasProp.call(_ref, key)) continue;
-      value = _ref[key];
-      additionalData[key] = value;
+    if (this.defMessageChannel) {
+      additionalData[this.defMessageChannel.getName()] = 'ws://' + this.FlintServerIp + ':9439/channels/' + this.defMessageChannel.getName();
     }
-    if (this.defPeer && this.defPeerId) {
-      additionalData['peerId'] = this.defPeerId;
+    if (this.dataPeerId) {
+      additionalData['dataPeerId'] = this.dataPeerId;
+    }
+    if (this.mediaPeerId) {
+      additionalData['mediaPeerId'] = this.mediaPeerId;
+    }
+    if (this.cusAdditionalData) {
+      additionalData['customData'] = this.cusAdditionalData;
     }
     if (Object.keys(additionalData).length > 0) {
       return additionalData;
@@ -2744,8 +2740,7 @@ FlintReceiverManager = (function(_super) {
       if ((_ref = this.ipcChannel) != null) {
         _ref.close();
       }
-      this.ipcChannel = null;
-      return this.defPeer = null;
+      return this.ipcChannel = null;
     } else {
       throw 'FlintReceiverManager is not started, cannot close!!!';
     }
@@ -2807,34 +2802,43 @@ FlintReceiverManager = (function(_super) {
   };
 
   FlintReceiverManager.prototype.createPeer = function() {
-    if (!this.defPeer) {
-      this.defPeer = new Peer({
-        host: '127.0.0.1',
-        port: '9433'
-      });
-      this.defPeer.on('open', (function(_this) {
-        return function(peerId) {
-          var additionalData;
-          _this.defPeerId = peerId;
-          additionalData = _this._joinAdditionalData();
-          if (additionalData) {
-            return _this._ipcSend({
-              type: 'additionaldata',
-              additionaldata: additionalData
-            });
-          }
-        };
-      })(this));
-    }
-    return this.defPeer;
-  };
-
-  FlintReceiverManager.prototype.createCustomPeer = function() {
     var peer;
     peer = new Peer({
       host: '127.0.0.1',
       port: '9433'
     });
+    return peer;
+  };
+
+  FlintReceiverManager.prototype.createDataPeer = function() {
+    var peer;
+    this.dataPeerId = null;
+    peer = new Peer({
+      host: '127.0.0.1',
+      port: '9433'
+    });
+    peer.on('open', (function(_this) {
+      return function(peerId) {
+        _this.dataPeerId = peerId;
+        return _this._sendAdditionalData();
+      };
+    })(this));
+    return peer;
+  };
+
+  FlintReceiverManager.prototype.createMediaPeer = function() {
+    var peer;
+    this.mediaPeerId = null;
+    peer = new Peer({
+      host: '127.0.0.1',
+      port: '9433'
+    });
+    peer.on('open', (function(_this) {
+      return function(peerId) {
+        _this.mediaPeerId = peerId;
+        return _this._sendAdditionalData();
+      };
+    })(this));
     return peer;
   };
 

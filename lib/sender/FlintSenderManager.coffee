@@ -51,8 +51,11 @@ class FlintSenderManager extends EventEmitter
         @host = @host.replace ':9431', ''
         console.log 'set service url ->', @serviceUrl
 
+    #
+    # event: 'customData' + 'available',
+    #
     getAdditionalData: ->
-        return @additionalData
+        return @additionalData['customData']
     #
     # listener:
     # on 'appstate', (result, state, additionaldata)
@@ -103,20 +106,20 @@ class FlintSenderManager extends EventEmitter
                 for i of items
                     if items[i].tagName and items[i].innerHTML
                         _tmpAdditionalData[items[i].tagName] = items[i].innerHTML
-                changed = false
+#                changed = false
                 for key, value of _tmpAdditionalData
                     if @additionalData[key] isnt value
-                        changed = true
+#                        changed = true
                         @emit key + 'available', value
-                if not changed
-                    _additionalData = @additionalData
-                    for key, value of _additionalData
-                        if _tmpAdditionalData[key] isnt value
-                            changed = true
-                            break
+#                if not changed
+#                    _additionalData = @additionalData
+#                    for key, value of _additionalData
+#                        if _tmpAdditionalData[key] isnt value
+#                            changed = true
+#                            break
                 @additionalData = _tmpAdditionalData
-                if changed
-                    @emit 'additionaldatachanged', @additionalData
+#                if changed
+#                    @emit 'additionaldatachanged', @additionalData
 
     #
     # listener:
@@ -340,25 +343,25 @@ class FlintSenderManager extends EventEmitter
             port: '9433'
         return peer
 
-    connectReceiverPeer: (options) ->
+    connectReceiverDataPeer: (options) ->
         peer = new Peer
             host: @host
             port: '9433'
-        if @additionalData['peerId']
-            peer.connect @additionalData['peerId'], options
+        if @additionalData['dataPeerId']
+            peer.connect @additionalData['dataPeerId'], options
         else
-            @.once 'peerId' + 'available', (peerId) =>
+            @.once 'dataPeerId' + 'available', (peerId) =>
                 peer.connect peerId, options
         return peer
 
-    callReceiverPeer: (stream, options) ->
+    callReceiverMediaPeer: (stream, options) ->
         peer = new Peer
             host: @host
             port: '9433'
-        if @additionalData['peerId']
-            peer.call @additionalData['peerId'], stream, options
+        if @additionalData['mediaPeerId']
+            peer.call @additionalData['mediaPeerId'], stream, options
         else
-            @.once 'peerId' + 'available', (peerId) =>
+            @.once 'mediaPeerId' + 'available', (peerId) =>
                 peer.call peerId, stream, options
         return peer
 

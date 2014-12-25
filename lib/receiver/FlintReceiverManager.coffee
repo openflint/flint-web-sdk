@@ -38,8 +38,9 @@ class FlintReceiverManager extends EventEmitter
 
         @defMessageChannel = @_createMessageChannel()
         @messageBusList = {}
-        @defPeer = null
-        @defPeerId = null
+
+        @dataPeerId = null
+        @mediaPeerId = null
 
         @cusAdditionalData = null
 
@@ -85,13 +86,7 @@ class FlintReceiverManager extends EventEmitter
                 @FlintServerIp = data['service_info']['ip'][0]
                 # uuid = data['service_info']['uuid']
                 # device_name = data['service_info']['device_name']
-                additionalData = @_joinAdditionalData()
-                if additionalData
-                    @_ipcSend
-                        type: 'additionaldata'
-                        additionaldata: additionalData
-                else
-                    console.warn 'no additionaldata need to send'
+                @_sendAdditionalData()
             when 'heartbeat'
                 if data.heartbeat is 'ping'
                     @_ipcSend
@@ -115,6 +110,9 @@ class FlintReceiverManager extends EventEmitter
     setAdditionalData: (additionaldata) ->
         console.info "set custom additionaldata: ", additionaldata
         @cusAdditionalData = additionaldata
+        @_sendAdditionalData()
+
+    _sendAdditionalData: ->
         additionalData = @_joinAdditionalData()
         if additionalData
             @_ipcSend
@@ -125,11 +123,16 @@ class FlintReceiverManager extends EventEmitter
 
     _joinAdditionalData: ->
         additionalData = {}
-        additionalData[@defMessageChannel.getName()] = 'ws://' + @FlintServerIp + ':9439/channels/' + @defMessageChannel.getName()
-        for own key, value of @cusAdditionalData
-            additionalData[key] = value
-        if @defPeer and @defPeerId
-            additionalData['peerId'] = @defPeerId
+
+        if @defMessageChannel
+            additionalData[@defMessageChannel.getName()] = 'ws://' + @FlintServerIp + ':9439/channels/' + @defMessageChannel.getName()
+        if @dataPeerId
+            additionalData['dataPeerId'] = @dataPeerId
+        if @mediaPeerId
+            additionalData['mediaPeerId'] = @mediaPeerId
+        if @cusAdditionalData
+            additionalData['customData'] = @cusAdditionalData
+
         if Object.keys(additionalData).length > 0
             return additionalData
         else
@@ -143,7 +146,6 @@ class FlintReceiverManager extends EventEmitter
             @messageBusList = null
             @ipcChannel?.close()
             @ipcChannel = null
-            @defPeer = null
         else
             throw 'FlintReceiverManager is not started, cannot close!!!'
 
@@ -188,23 +190,29 @@ class FlintReceiverManager extends EventEmitter
         return @messageBusList
 
     createPeer: ->
-        if not @defPeer
-            @defPeer = new Peer
-                host: '127.0.0.1'
-                port: '9433'
-            @defPeer.on 'open', (peerId) =>
-                @defPeerId = peerId
-                additionalData = @_joinAdditionalData()
-                if additionalData
-                    @_ipcSend
-                        type: 'additionaldata'
-                        additionaldata: additionalData
-        return @defPeer
-
-    createCustomPeer: ->
         peer = new Peer
             host: '127.0.0.1'
             port: '9433'
+        return peer
+
+    createDataPeer: ->
+        @dataPeerId = null
+        peer = new Peer
+            host: '127.0.0.1'
+            port: '9433'
+        peer.on 'open', (peerId) =>
+            @dataPeerId = peerId
+            @_sendAdditionalData()
+        return peer
+
+    createMediaPeer: ->
+        @mediaPeerId = null
+        peer = new Peer
+            host: '127.0.0.1'
+            port: '9433'
+        peer.on 'open', (peerId) =>
+            @mediaPeerId = peerId
+            @_sendAdditionalData()
         return peer
 
     _isStarted: ->

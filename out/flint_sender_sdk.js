@@ -2995,7 +2995,7 @@ FlintSenderManager = (function(_super) {
   };
 
   FlintSenderManager.prototype.getAdditionalData = function() {
-    return this.additionalData;
+    return this.additionalData['customData'];
   };
 
   FlintSenderManager.prototype.getState = function(callback) {
@@ -3044,7 +3044,7 @@ FlintSenderManager = (function(_super) {
   };
 
   FlintSenderManager.prototype._parseAdditionalData = function(additionalData) {
-    var changed, i, items, key, value, _additionalData, _tmpAdditionalData;
+    var i, items, key, value, _tmpAdditionalData;
     if ((additionalData != null ? additionalData.length : void 0) > 0) {
       items = additionalData[0].childNodes;
       if (items) {
@@ -3054,28 +3054,13 @@ FlintSenderManager = (function(_super) {
             _tmpAdditionalData[items[i].tagName] = items[i].innerHTML;
           }
         }
-        changed = false;
         for (key in _tmpAdditionalData) {
           value = _tmpAdditionalData[key];
           if (this.additionalData[key] !== value) {
-            changed = true;
             this.emit(key + 'available', value);
           }
         }
-        if (!changed) {
-          _additionalData = this.additionalData;
-          for (key in _additionalData) {
-            value = _additionalData[key];
-            if (_tmpAdditionalData[key] !== value) {
-              changed = true;
-              break;
-            }
-          }
-        }
-        this.additionalData = _tmpAdditionalData;
-        if (changed) {
-          return this.emit('additionaldatachanged', this.additionalData);
-        }
+        return this.additionalData = _tmpAdditionalData;
       }
     }
   };
@@ -3370,16 +3355,16 @@ FlintSenderManager = (function(_super) {
     return peer;
   };
 
-  FlintSenderManager.prototype.connectReceiverPeer = function(options) {
+  FlintSenderManager.prototype.connectReceiverDataPeer = function(options) {
     var peer;
     peer = new Peer({
       host: this.host,
       port: '9433'
     });
-    if (this.additionalData['peerId']) {
-      peer.connect(this.additionalData['peerId'], options);
+    if (this.additionalData['dataPeerId']) {
+      peer.connect(this.additionalData['dataPeerId'], options);
     } else {
-      this.once('peerId' + 'available', (function(_this) {
+      this.once('dataPeerId' + 'available', (function(_this) {
         return function(peerId) {
           return peer.connect(peerId, options);
         };
@@ -3388,16 +3373,16 @@ FlintSenderManager = (function(_super) {
     return peer;
   };
 
-  FlintSenderManager.prototype.callReceiverPeer = function(stream, options) {
+  FlintSenderManager.prototype.callReceiverMediaPeer = function(stream, options) {
     var peer;
     peer = new Peer({
       host: this.host,
       port: '9433'
     });
-    if (this.additionalData['peerId']) {
-      peer.call(this.additionalData['peerId'], stream, options);
+    if (this.additionalData['mediaPeerId']) {
+      peer.call(this.additionalData['mediaPeerId'], stream, options);
     } else {
-      this.once('peerId' + 'available', (function(_this) {
+      this.once('mediaPeerId' + 'available', (function(_this) {
         return function(peerId) {
           return peer.call(peerId, stream, options);
         };
