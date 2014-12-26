@@ -25,7 +25,7 @@ PluginLoader = require '../plugin/PluginLoader'
 class FlintReceiverManager extends EventEmitter
 
     constructor: (@appId) ->
-        PluginLoader.setItAsReceiver()
+#        PluginLoader.setItAsReceiver()
 
         if not @appId
             throw 'illegal APP ID'
