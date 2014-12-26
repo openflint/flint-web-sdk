@@ -3191,9 +3191,13 @@ FlintSenderManager = (function(_super) {
     var headers;
     this._stopHeartbeat();
     headers = {
-      'Accept': 'application/xml; charset=utf8',
-      'Authorization': this.token
+      'Accept': 'application/xml; charset=utf8'
     };
+    if (this.token) {
+      headers['Authorization'] = this.token;
+    } else {
+      headers['Authorization'] = 'bad-token';
+    }
     return this._getState(this.serviceUrl, headers, (function(_this) {
       return function(result, state) {
         var url;

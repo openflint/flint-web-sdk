@@ -228,7 +228,10 @@ class FlintSenderManager extends EventEmitter
         @_stopHeartbeat()
         headers =
             'Accept': 'application/xml; charset=utf8'
-            'Authorization': @token
+        if @token
+            headers['Authorization'] = @token
+        else
+            headers['Authorization'] = 'bad-token'
         @_getState @serviceUrl, headers, (result, state) =>
             if result # @token is available
                 if state is 'stopped' # already stopped
