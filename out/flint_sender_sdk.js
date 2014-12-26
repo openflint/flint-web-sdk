@@ -1208,6 +1208,7 @@ var EventEmitter = require('eventemitter3');
 var Socket = require('./socket');
 var MediaConnection = require('./mediaconnection');
 var DataConnection = require('./dataconnection');
+var PluginLoader = require('../plugin/PluginLoader');
 
 /**
  * A peer who can initiate connections with other peers.
@@ -1336,7 +1337,8 @@ Peer.prototype._initializeServerConnection = function() {
 /** Get a unique ID from the server via XHR. */
 Peer.prototype._retrieveId = function(cb) {
   var self = this;
-  var http = new XMLHttpRequest();
+//  var http = new XMLHttpRequest();
+  var http = PluginLoader.getPlugin().createXMLHttpRequest();
   var protocol = this.options.secure ? 'https://' : 'http://';
   var url = protocol + this.options.host + ':' + this.options.port +
     this.options.path + this.options.key + '/id';
@@ -1662,7 +1664,8 @@ Peer.prototype.reconnect = function() {
 Peer.prototype.listAllPeers = function(cb) {
   cb = cb || function() {};
   var self = this;
-  var http = new XMLHttpRequest();
+//  var http = new XMLHttpRequest();
+  var http = PluginLoader.getPlugin().createXMLHttpRequest();
   var protocol = this.options.secure ? 'https://' : 'http://';
   var url = protocol + this.options.host + ':' + this.options.port +
     this.options.path + this.options.key + '/peers';
@@ -1701,7 +1704,7 @@ Peer.prototype.listAllPeers = function(cb) {
 
 module.exports = Peer;
 
-},{"./dataconnection":10,"./mediaconnection":11,"./socket":14,"./util":15,"eventemitter3":30}],14:[function(require,module,exports){
+},{"../plugin/PluginLoader":23,"./dataconnection":10,"./mediaconnection":11,"./socket":14,"./util":15,"eventemitter3":30}],14:[function(require,module,exports){
 var util = require('./util');
 var EventEmitter = require('eventemitter3');
 var PluginLoader = require('../plugin/PluginLoader');
