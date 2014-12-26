@@ -2592,6 +2592,7 @@ FlintReceiverManager = (function(_super) {
 
   function FlintReceiverManager(appId) {
     this.appId = appId;
+    PluginLoader.setItAsReceiver();
     if (!this.appId) {
       throw 'illegal APP ID';
     } else {
