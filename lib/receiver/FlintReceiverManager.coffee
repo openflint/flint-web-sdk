@@ -193,6 +193,7 @@ class FlintReceiverManager extends EventEmitter
         peer = new Peer
             host: '127.0.0.1'
             port: '9433'
+            secure: false
         return peer
 
     createDataPeer: ->
@@ -200,6 +201,7 @@ class FlintReceiverManager extends EventEmitter
         peer = new Peer
             host: '127.0.0.1'
             port: '9433'
+            secure: false
         peer.on 'open', (peerId) =>
             @dataPeerId = peerId
             @_sendAdditionalData()
@@ -210,6 +212,7 @@ class FlintReceiverManager extends EventEmitter
         peer = new Peer
             host: '127.0.0.1'
             port: '9433'
+            secure: false
         peer.on 'open', (peerId) =>
             @mediaPeerId = peerId
             @_sendAdditionalData()

@@ -344,12 +344,14 @@ class FlintSenderManager extends EventEmitter
         peer = new Peer
             host: @host
             port: '9433'
+            secure: false
         return peer
 
     connectReceiverDataPeer: (options) ->
         peer = new Peer
             host: @host
             port: '9433'
+            secure: false
         if @additionalData['dataPeerId']
             peer.connect @additionalData['dataPeerId'], options
         else
@@ -361,6 +363,7 @@ class FlintSenderManager extends EventEmitter
         peer = new Peer
             host: @host
             port: '9433'
+            secure: false
         if @additionalData['mediaPeerId']
             peer.call @additionalData['mediaPeerId'], stream, options
         else

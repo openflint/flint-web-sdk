@@ -3354,7 +3354,8 @@ FlintSenderManager = (function(_super) {
     var peer;
     peer = new Peer({
       host: this.host,
-      port: '9433'
+      port: '9433',
+      secure: false
     });
     return peer;
   };
@@ -3363,7 +3364,8 @@ FlintSenderManager = (function(_super) {
     var peer;
     peer = new Peer({
       host: this.host,
-      port: '9433'
+      port: '9433',
+      secure: false
     });
     if (this.additionalData['dataPeerId']) {
       peer.connect(this.additionalData['dataPeerId'], options);
@@ -3381,7 +3383,8 @@ FlintSenderManager = (function(_super) {
     var peer;
     peer = new Peer({
       host: this.host,
-      port: '9433'
+      port: '9433',
+      secure: false
     });
     if (this.additionalData['mediaPeerId']) {
       peer.call(this.additionalData['mediaPeerId'], stream, options);

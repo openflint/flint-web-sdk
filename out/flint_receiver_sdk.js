@@ -2805,7 +2805,8 @@ FlintReceiverManager = (function(_super) {
     var peer;
     peer = new Peer({
       host: '127.0.0.1',
-      port: '9433'
+      port: '9433',
+      secure: false
     });
     return peer;
   };
@@ -2815,7 +2816,8 @@ FlintReceiverManager = (function(_super) {
     this.dataPeerId = null;
     peer = new Peer({
       host: '127.0.0.1',
-      port: '9433'
+      port: '9433',
+      secure: false
     });
     peer.on('open', (function(_this) {
       return function(peerId) {
@@ -2831,7 +2833,8 @@ FlintReceiverManager = (function(_super) {
     this.mediaPeerId = null;
     peer = new Peer({
       host: '127.0.0.1',
-      port: '9433'
+      port: '9433',
+      secure: false
     });
     peer.on('open', (function(_this) {
       return function(peerId) {
