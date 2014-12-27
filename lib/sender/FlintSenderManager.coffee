@@ -334,12 +334,6 @@ class FlintSenderManager extends EventEmitter
             @messageBusList[namespace] = messageBus
         return messageBus
 
-    #
-    # TODO: need this API???
-    #
-    _getMessageBusList: ->
-        return @messageBusList
-
     createPeer: ->
         peer = new Peer
             host: @host

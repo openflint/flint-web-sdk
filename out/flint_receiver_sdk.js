@@ -2604,7 +2604,7 @@ FlintReceiverManager = (function(_super) {
     this.ipcChannel = null;
     this.ipcAddress = "ws://127.0.0.1:9431/receiver/" + this.appId;
     this.FlintServerIp = '127.0.0.1';
-    this.defMessageChannel = this._createMessageChannel();
+    this.messageChannel = null;
     this.messageBusList = {};
     this.dataPeerId = null;
     this.mediaPeerId = null;
@@ -2612,6 +2612,7 @@ FlintReceiverManager = (function(_super) {
   }
 
   FlintReceiverManager.prototype.open = function() {
+    var _ref;
     if (this._isStarted()) {
       console.warn('FlintReceiverManager is already opened');
       return;
@@ -2654,7 +2655,7 @@ FlintReceiverManager = (function(_super) {
       };
     })(this));
     this.ipcChannel.open();
-    return this.defMessageChannel.open();
+    return (_ref = this.messageChannel) != null ? _ref.open() : void 0;
   };
 
   FlintReceiverManager.prototype._onIpcMessage = function(data) {
@@ -2713,8 +2714,8 @@ FlintReceiverManager = (function(_super) {
   FlintReceiverManager.prototype._joinAdditionalData = function() {
     var additionalData;
     additionalData = {};
-    if (this.defMessageChannel) {
-      additionalData[this.defMessageChannel.getName()] = 'ws://' + this.FlintServerIp + ':9439/channels/' + this.defMessageChannel.getName();
+    if (this.messageChannel) {
+      additionalData['channelBaseUrl'] = 'ws://' + this.FlintServerIp + ':9439/channels/' + this.messageChannel.getName();
     }
     if (this.dataPeerId) {
       additionalData['dataPeerId'] = this.dataPeerId;
@@ -2733,15 +2734,18 @@ FlintReceiverManager = (function(_super) {
   };
 
   FlintReceiverManager.prototype.close = function() {
-    var _ref;
+    var _ref, _ref1;
     if (this._isStarted()) {
       this._ipcSend({
         type: 'unregister'
       });
-      this.defMessageChannel = null;
-      this.messageBusList = null;
-      if ((_ref = this.ipcChannel) != null) {
+      if ((_ref = this.messageChannel) != null) {
         _ref.close();
+      }
+      this.messageChannel = null;
+      this.messageBusList = null;
+      if ((_ref1 = this.ipcChannel) != null) {
+        _ref1.close();
       }
       return this.ipcChannel = null;
     } else {
@@ -2749,31 +2753,26 @@ FlintReceiverManager = (function(_super) {
     }
   };
 
-  FlintReceiverManager.prototype._createMessageChannel = function() {
-    var url;
-    if (this._isStarted()) {
-      throw 'FlintReceiverManager is started, cannot create default message channel';
-    }
-    if (!this.defMessageChannel) {
-      url = 'ws://127.0.0.1:9439/channels/' + FlintConstants.DEFAULT_CHANNEL_NAME;
-      this.defMessageChannel = new ReceiverMessageChannel(FlintConstants.DEFAULT_CHANNEL_NAME, url);
-      this.defMessageChannel.on('open', (function(_this) {
-        return function(event) {
-          return console.log('Receiver default message channel open!!! ', event);
-        };
-      })(this));
-      this.defMessageChannel.on('close', (function(_this) {
-        return function(event) {
-          return console.log('Receiver default message channel open!!! ', event);
-        };
-      })(this));
-      this.defMessageChannel.on('error', (function(_this) {
-        return function(event) {
-          return console.log('Receiver default message channel open!!! ', event);
-        };
-      })(this));
-    }
-    return this.defMessageChannel;
+  FlintReceiverManager.prototype._createMessageChannel = function(channelName) {
+    var channel, url;
+    url = 'ws://127.0.0.1:9439/channels/' + channelName;
+    channel = new ReceiverMessageChannel(channelName, url);
+    channel.on('open', (function(_this) {
+      return function(event) {
+        return console.log('Receiver default message channel open!!! ', event);
+      };
+    })(this));
+    channel.on('close', (function(_this) {
+      return function(event) {
+        return console.log('Receiver default message channel open!!! ', event);
+      };
+    })(this));
+    channel.on('error', (function(_this) {
+      return function(event) {
+        return console.log('Receiver default message channel open!!! ', event);
+      };
+    })(this));
+    return channel;
   };
 
   FlintReceiverManager.prototype.createMessageBus = function(namespace) {
@@ -2781,8 +2780,8 @@ FlintReceiverManager = (function(_super) {
     if (!namespace) {
       namespace = FlintConstants.DEFAULT_NAMESPACE;
     }
-    if (!this.defMessageChannel) {
-      throw 'createMessageBus failed: default MessageChannel is null';
+    if (!this.messageChannel) {
+      this.messageChannel = this._createMessageChannel(FlintConstants.DEFAULT_CHANNEL_NAME);
     }
     messageBus = this._createMessageBus(namespace);
     return messageBus;
@@ -2794,14 +2793,10 @@ FlintReceiverManager = (function(_super) {
     if (this.messageBusList[namespace]) {
       messageBus = this.messageBusList[namespace];
     } else {
-      messageBus = new ReceiverMessageBus(this.defMessageChannel, namespace);
+      messageBus = new ReceiverMessageBus(this.messageChannel, namespace);
       this.messageBusList[namespace] = messageBus;
     }
     return messageBus;
-  };
-
-  FlintReceiverManager.prototype._getMessageBusList = function() {
-    return this.messageBusList;
   };
 
   FlintReceiverManager.prototype.createPeer = function() {

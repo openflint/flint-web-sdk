@@ -3349,10 +3349,6 @@ FlintSenderManager = (function(_super) {
     return messageBus;
   };
 
-  FlintSenderManager.prototype._getMessageBusList = function() {
-    return this.messageBusList;
-  };
-
   FlintSenderManager.prototype.createPeer = function() {
     var peer;
     peer = new Peer({

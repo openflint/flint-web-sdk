@@ -36,7 +36,7 @@ class FlintReceiverManager extends EventEmitter
         @ipcAddress = "ws://127.0.0.1:9431/receiver/" + @appId
         @FlintServerIp = '127.0.0.1'
 
-        @defMessageChannel = @_createMessageChannel()
+        @messageChannel = null
         @messageBusList = {}
 
         @dataPeerId = null
@@ -75,7 +75,9 @@ class FlintReceiverManager extends EventEmitter
                 console.error 'error: ', e
 
         @ipcChannel.open()
-        @defMessageChannel.open()
+
+        # open message channel if present
+        @messageChannel?.open()
 
     _onIpcMessage: (data) ->
         switch data.type
@@ -124,8 +126,8 @@ class FlintReceiverManager extends EventEmitter
     _joinAdditionalData: ->
         additionalData = {}
 
-        if @defMessageChannel
-            additionalData[@defMessageChannel.getName()] = 'ws://' + @FlintServerIp + ':9439/channels/' + @defMessageChannel.getName()
+        if @messageChannel
+            additionalData['channelBaseUrl'] = 'ws://' + @FlintServerIp + ':9439/channels/' + @messageChannel.getName()
         if @dataPeerId
             additionalData['dataPeerId'] = @dataPeerId
         if @mediaPeerId
@@ -142,26 +144,24 @@ class FlintReceiverManager extends EventEmitter
         if @_isStarted()
             @_ipcSend
                 type: 'unregister'
-            @defMessageChannel = null
+            @messageChannel?.close()
+            @messageChannel = null
             @messageBusList = null
             @ipcChannel?.close()
             @ipcChannel = null
         else
             throw 'FlintReceiverManager is not started, cannot close!!!'
 
-    _createMessageChannel: ->
-        if @_isStarted()
-            throw 'FlintReceiverManager is started, cannot create default message channel'
-        if not @defMessageChannel
-            url = 'ws://127.0.0.1:9439/channels/' + FlintConstants.DEFAULT_CHANNEL_NAME
-            @defMessageChannel = new ReceiverMessageChannel FlintConstants.DEFAULT_CHANNEL_NAME, url
-            @defMessageChannel.on 'open', (event) =>
-                console.log 'Receiver default message channel open!!! ', event
-            @defMessageChannel.on 'close', (event) =>
-                console.log 'Receiver default message channel open!!! ', event
-            @defMessageChannel.on 'error', (event) =>
-                console.log 'Receiver default message channel open!!! ', event
-        return @defMessageChannel
+    _createMessageChannel: (channelName) ->
+        url = 'ws://127.0.0.1:9439/channels/' + channelName
+        channel = new ReceiverMessageChannel channelName, url
+        channel.on 'open', (event) =>
+            console.log 'Receiver default message channel open!!! ', event
+        channel.on 'close', (event) =>
+            console.log 'Receiver default message channel open!!! ', event
+        channel.on 'error', (event) =>
+            console.log 'Receiver default message channel open!!! ', event
+        return channel
 
     #
     # for android/iOS senders, don't suggest to use this API if the sender is a web app
@@ -169,8 +169,9 @@ class FlintReceiverManager extends EventEmitter
     createMessageBus: (namespace) ->
         if not namespace
             namespace = FlintConstants.DEFAULT_NAMESPACE
-        if not @defMessageChannel
-            throw 'createMessageBus failed: default MessageChannel is null'
+        if not @messageChannel
+            @messageChannel = @_createMessageChannel FlintConstants.DEFAULT_CHANNEL_NAME
+#            throw 'createMessageBus failed: default MessageChannel is null'
         messageBus = @_createMessageBus namespace
         return messageBus
 
@@ -179,15 +180,9 @@ class FlintReceiverManager extends EventEmitter
         if @messageBusList[namespace]
             messageBus = @messageBusList[namespace]
         else
-            messageBus = new ReceiverMessageBus @defMessageChannel, namespace
+            messageBus = new ReceiverMessageBus @messageChannel, namespace
             @messageBusList[namespace] = messageBus
         return messageBus
-
-    #
-    # TODO: need this API???
-    #
-    _getMessageBusList: ->
-        return @messageBusList
 
     createPeer: ->
         peer = new Peer
