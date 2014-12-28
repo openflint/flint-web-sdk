@@ -39,13 +39,20 @@ class PluginLoader
             #   common
             platform = Platform.getPlatform()
             console.info 'Platform is : ', platform.browser
-            switch platform.browser
-                when 'ffos'
-                    PluginLoader.plugin = new FfosPlugin(PluginLoader.isReceiver)
-                when 'firefox', 'chrome', 'safari', 'msie'
-                    PluginLoader.plugin = new NPAPIPlugin(PluginLoader.isReceiver)
-                else
-                    PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver)
+            try
+                switch platform.browser
+                    when 'ffos'
+                        PluginLoader.plugin = new FfosPlugin(PluginLoader.isReceiver)
+                    when 'firefox', 'chrome', 'safari', 'msie'
+                        PluginLoader.plugin = new NPAPIPlugin(PluginLoader.isReceiver)
+                    else
+                        PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver)
+            catch e
+                PluginLoader.plugin = null
+                console.error 'catch: ', e
+
+            if not PluginLoader.plugin
+                PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver)
 
         return PluginLoader.plugin
 

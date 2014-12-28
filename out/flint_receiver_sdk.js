@@ -2535,25 +2535,34 @@ PluginLoader = (function() {
   PluginLoader.isReceiver = false;
 
   PluginLoader.getPlugin = function() {
-    var platform;
+    var e, platform;
     if (PluginLoader.DEBUG) {
       PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver);
     }
     if (!PluginLoader.plugin) {
       platform = Platform.getPlatform();
       console.info('Platform is : ', platform.browser);
-      switch (platform.browser) {
-        case 'ffos':
-          PluginLoader.plugin = new FfosPlugin(PluginLoader.isReceiver);
-          break;
-        case 'firefox':
-        case 'chrome':
-        case 'safari':
-        case 'msie':
-          PluginLoader.plugin = new NPAPIPlugin(PluginLoader.isReceiver);
-          break;
-        default:
-          PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver);
+      try {
+        switch (platform.browser) {
+          case 'ffos':
+            PluginLoader.plugin = new FfosPlugin(PluginLoader.isReceiver);
+            break;
+          case 'firefox':
+          case 'chrome':
+          case 'safari':
+          case 'msie':
+            PluginLoader.plugin = new NPAPIPlugin(PluginLoader.isReceiver);
+            break;
+          default:
+            PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver);
+        }
+      } catch (_error) {
+        e = _error;
+        PluginLoader.plugin = null;
+        console.error('catch: ', e);
+      }
+      if (!PluginLoader.plugin) {
+        PluginLoader.plugin = new FakePlugin(PluginLoader.isReceiver);
       }
     }
     return PluginLoader.plugin;
