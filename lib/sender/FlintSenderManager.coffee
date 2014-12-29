@@ -213,7 +213,8 @@ class FlintSenderManager extends EventEmitter
             headers =
                 'Accept': 'application/xml; charset=utf8'
                 'Authorization': @token
-            @_request 'GET', @serviceUrl, headers, null, null
+            @_getState @serviceUrl, headers, (result, state) =>
+                @emit 'appstate', result, state, @additionalData
         ), @heartbeatInterval
 
     _stopHeartbeat: ->
