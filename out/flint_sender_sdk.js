@@ -3188,7 +3188,9 @@ FlintSenderManager = (function(_super) {
           'Accept': 'application/xml; charset=utf8',
           'Authorization': _this.token
         };
-        return _this._request('GET', _this.serviceUrl, headers, null, null);
+        return _this._getState(_this.serviceUrl, headers, function(result, state) {
+          return _this.emit('appstate', result, state, _this.additionalData);
+        });
       };
     })(this)), this.heartbeatInterval);
   };
