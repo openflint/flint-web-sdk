@@ -14,3 +14,8 @@ cp -r downloads/osx/npFlintPlugin.plugin ~/Library/Internet\ Plug-Ins/
 mkdir -p ~/.mozilla/plugins/
 cp downloads/linux/npFlintPlugin.so ~/.mozilla/plugins/
 ```
+
+### Windows
+```
+regsvr32 downloads/windows/npFlintPlugin.dll
+```
