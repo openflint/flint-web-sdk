@@ -95,7 +95,6 @@ class FlintSenderManager extends EventEmitter
         @_parseAdditionalData additionalData
 
     #
-    # check original additional data, 'additionaldatachanged' would be emitted if anything changed
     # "key+'available'" event would be emitted if the new additionaldata contains the certain key
     #
     _parseAdditionalData: (additionalData) ->
