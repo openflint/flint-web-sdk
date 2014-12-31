@@ -21,7 +21,11 @@ class ReceiverMessageBus extends MessageBus
     constructor: (channel, namespace) ->
         super channel, namespace
 
-    _initOnMessage: ->
+    _init: ->
+        @channel.on 'senderConnected', (senderId) =>
+            @emit 'senderConnected', senderId
+        @channel.on 'senderDisconnected', (senderId) =>
+            @emit 'senderDisconnected', senderId
         @channel.on 'message', (message, senderId) =>
             try
                 data = JSON.parse message

@@ -21,7 +21,7 @@ class SenderMessageBus extends MessageBus
     constructor: (channel, namespace) ->
         super channel, namespace
 
-    _initOnMessage: ->
+    _init: ->
         @channel.on 'message', (message) =>
             try
                 data = JSON.parse message

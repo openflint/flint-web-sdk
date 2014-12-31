@@ -19,13 +19,12 @@ EventEmitter = require 'eventemitter3'
 class MessageBus extends EventEmitter
 
     constructor: (@channel, @namespace) ->
-        @channel.on 'senderConnected', (senderId) =>
-            @emit 'senderConnected', senderId
-        @channel.on 'senderDisconnected', (senderId) =>
-            @emit 'senderDisconnected', senderId
-        @_initOnMessage()
+        @_init()
 
-    _initOnMessage: ->
+    _init: ->
+        throw 'Not Implement'
+
+    send: ->
         throw 'Not Implement'
 
 module.exports = MessageBus
