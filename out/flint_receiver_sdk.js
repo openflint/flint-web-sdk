@@ -159,20 +159,14 @@ MessageBus = (function(_super) {
   function MessageBus(channel, namespace) {
     this.channel = channel;
     this.namespace = namespace;
-    this.channel.on('senderConnected', (function(_this) {
-      return function(senderId) {
-        return _this.emit('senderConnected', senderId);
-      };
-    })(this));
-    this.channel.on('senderDisconnected', (function(_this) {
-      return function(senderId) {
-        return _this.emit('senderDisconnected', senderId);
-      };
-    })(this));
-    this._initOnMessage();
+    this._init();
   }
 
-  MessageBus.prototype._initOnMessage = function() {
+  MessageBus.prototype._init = function() {
+    throw 'Not Implement';
+  };
+
+  MessageBus.prototype.send = function() {
     throw 'Not Implement';
   };
 
@@ -2885,7 +2879,17 @@ ReceiverMessageBus = (function(_super) {
     ReceiverMessageBus.__super__.constructor.call(this, channel, namespace);
   }
 
-  ReceiverMessageBus.prototype._initOnMessage = function() {
+  ReceiverMessageBus.prototype._init = function() {
+    this.channel.on('senderConnected', (function(_this) {
+      return function(senderId) {
+        return _this.emit('senderConnected', senderId);
+      };
+    })(this));
+    this.channel.on('senderDisconnected', (function(_this) {
+      return function(senderId) {
+        return _this.emit('senderDisconnected', senderId);
+      };
+    })(this));
     return this.channel.on('message', (function(_this) {
       return function(message, senderId) {
         var data, e;

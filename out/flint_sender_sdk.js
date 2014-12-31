@@ -159,20 +159,14 @@ MessageBus = (function(_super) {
   function MessageBus(channel, namespace) {
     this.channel = channel;
     this.namespace = namespace;
-    this.channel.on('senderConnected', (function(_this) {
-      return function(senderId) {
-        return _this.emit('senderConnected', senderId);
-      };
-    })(this));
-    this.channel.on('senderDisconnected', (function(_this) {
-      return function(senderId) {
-        return _this.emit('senderDisconnected', senderId);
-      };
-    })(this));
-    this._initOnMessage();
+    this._init();
   }
 
-  MessageBus.prototype._initOnMessage = function() {
+  MessageBus.prototype._init = function() {
+    throw 'Not Implement';
+  };
+
+  MessageBus.prototype.send = function() {
     throw 'Not Implement';
   };
 
@@ -3439,7 +3433,7 @@ SenderMessageBus = (function(_super) {
     SenderMessageBus.__super__.constructor.call(this, channel, namespace);
   }
 
-  SenderMessageBus.prototype._initOnMessage = function() {
+  SenderMessageBus.prototype._init = function() {
     return this.channel.on('message', (function(_this) {
       return function(message) {
         var data, e;
