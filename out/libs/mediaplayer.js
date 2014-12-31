@@ -30,8 +30,8 @@ var MediaPlayer = function (manager, videoId) {
     self.requestIdSeek = 0;
     self.requestIdGetStatus = 0;
 
-    self.receiverManagerr = manager;
-    var messageBus = self.receiverManagerr.createMessageBus("urn:flint:org.openflint.fling.media");
+    self.receiverManager = manager;
+    var messageBus = self.receiverManager.createMessageBus("urn:flint:org.openflint.fling.media");
 
     var video = (typeof(videoId) == "string") ? document.getElementById(videoId) : videoId;
     if (video == null) {
