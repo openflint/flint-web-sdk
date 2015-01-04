@@ -48,7 +48,7 @@ sender端与receiver端通过MessageBus进行通信。
     * 两端只要创建了相同namespace的MessageBus，消息就可以在这两个MessageBus之间传递。如果application只需要一个MessageBus就能满足需求，那么在两端可以各自创建一个匿名的MessageBus，也可以相互通信。
     * sender端的MessageBus与receiver端的MessageBus是多对一的关系，即多个sender可以创建同一个namespace的MessageBus，同时与1个receiver的MessageBus通信。
 
-* 创建匿名MessageBus
+* 创建MessageBus
 
     ```
     var bus = null;

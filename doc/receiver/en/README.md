@@ -1,30 +1,26 @@
 # Receiver SDK
 
-## 创建FlintReceiverManager
+## use FlintReceiverManager
 ```
 var receiverManager = new FlintReceiverManager(appid /* application ID */);
-// 启动FlintReceiverManager
+// open FlintReceiverManager
 receiverManager.open();
-// 停止FlintReceiverManager
+// stop FlintReceiverManager
 receiverManager.close();
 ```
 
-## 创建通信链路
-receiver端与sender端通过MessageBus进行通信。
+## use communication link
 
-    * 两端只要创建了相同namespace的MessageBus，消息就可以在这两个MessageBus之间传递。如果application只需要一个MessageBus就能满足需求，那么在两端可以各自创建一个匿名的MessageBus，也可以相互通信。
-    * sender端的MessageBus与receiver端的MessageBus是多对一的关系，即多个sender可以创建同一个namespace的MessageBus，同时与1个receiver的MessageBus通信。
-
-* 创建MessageBus
+* create MessageBus
 
     ```
     var bus = null;
-    // 创建匿名MessageBus
+    // create anonymous MessageBus
     bus = receiverManager.createMessageBus();
-    // 创建命名MessageBus
+    // create named MessageBus
     bus = receiverManager.createMessageBus('namespace');    
     ```
-* 监听事件
+* listen event
 
     ```
     messageBus.on('message', function(message, senderId /* from which sender */) {
@@ -38,26 +34,26 @@ receiver端与sender端通过MessageBus进行通信。
         console.log(senderId);
     });
     ```
-* 发送消息
+* send message
 
     ```
     messageBus.send('some message');
     ```
 
-## 使用WebRTC
-* 创建Peer
+## use WebRTC
+* create Peer
 
     ```
     var peer = senderManager.createPeer();
     ```
     
-* 创建data peer, sender可以通过connectReceiverPeer()接口进行连接
+* create data peer, sender could use FlintSenderManager.connectReceiverPeer() to connect with is.
 
     ```
     var dataPeer = receiverManager.createDataPeer();
     ```
 
-* 创建media peer, sender可以通过callReceiverPeer()接口进行连接
+* create media peer, sender could use FlintSenderManager.callReceiverPeer() to connect with is.
 
     ```
     var mediaPeer = receiverManager.createMediaPeer();
