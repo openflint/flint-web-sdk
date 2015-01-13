@@ -42,7 +42,7 @@ class FlintSenderManager extends EventEmitter
         @heartbeatInterval = 3 * 1000
         @heartbeatTimerId = null
 
-        @defMessageChannel = @_createMessageChannel()
+        @defMessageChannel = null
         @messageBusList = {}
 
     setServiceUrl: (@urlBase) ->
@@ -321,7 +321,7 @@ class FlintSenderManager extends EventEmitter
         if not namespace
             namespace = FlintConstants.DEFAULT_NAMESPACE
         if not @defMessageChannel
-            throw 'createMessageBus failed: default MessageChannel is null'
+            @defMessageChannel = @_createMessageChannel()
         messageBus = @_createMessageBus namespace
         return messageBus
 

@@ -2988,7 +2988,7 @@ FlintSenderManager = (function(_super) {
     this.token = null;
     this.heartbeatInterval = 3 * 1000;
     this.heartbeatTimerId = null;
-    this.defMessageChannel = this._createMessageChannel();
+    this.defMessageChannel = null;
     this.messageBusList = {};
   }
 
@@ -3336,7 +3336,7 @@ FlintSenderManager = (function(_super) {
       namespace = FlintConstants.DEFAULT_NAMESPACE;
     }
     if (!this.defMessageChannel) {
-      throw 'createMessageBus failed: default MessageChannel is null';
+      this.defMessageChannel = this._createMessageChannel();
     }
     messageBus = this._createMessageBus(namespace);
     return messageBus;
