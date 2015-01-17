@@ -20,13 +20,10 @@ MessageChannel = require '../common/MessageChannel'
 ReceiverMessageBus = require './ReceiverMessageBus'
 FlintConstants = require '../common/FlintConstants'
 Peer = require '../peerjs/peer'
-PluginLoader = require '../plugin/PluginLoader'
 
 class FlintReceiverManager extends EventEmitter
 
     constructor: (@appId) ->
-        PluginLoader.setItAsReceiver()
-
         if not @appId
             throw 'illegal APP ID'
         else

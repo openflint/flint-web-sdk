@@ -18,13 +18,7 @@ MessageChannel = require '../common/MessageChannel'
 
 class SenderMessageChannel extends MessageChannel
 
-    constructor: (@pluginLoader, name, url) ->
+    constructor: (@platform, name, url) ->
         super name, url
-
-    _createWebsocket: (url) ->
-        ws = @pluginLoader.getPlugin().createWebSocket(url)
-        if not ws
-            throw 'SenderMessageChannel createWebSocket failed!!!'
-        return ws
 
 module.exports = SenderMessageChannel

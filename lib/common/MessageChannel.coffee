@@ -37,7 +37,7 @@ class MessageChannel extends EventEmitter
     open: (url) ->
         if url
             @url = url
-        @wsChannel = @_createWebsocket @url
+        @wsChannel = new WebSocket url
 
         @wsChannel.onopen = (event) =>
             @emit 'open', event
@@ -48,9 +48,6 @@ class MessageChannel extends EventEmitter
         @_initOnMessage()
 
         @opened = true
-
-    _createWebsocket: (url) ->
-        return new WebSocket url
 
     _initOnMessage: ->
         @wsChannel.onmessage = (event) =>
