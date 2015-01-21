@@ -217,7 +217,7 @@ MessageChannel = (function(_super) {
     if (url) {
       this.url = url;
     }
-    this.wsChannel = new WebSocket(url);
+    this.wsChannel = new WebSocket(this.url);
     this.wsChannel.onopen = (function(_this) {
       return function(event) {
         return _this.emit('open', event);

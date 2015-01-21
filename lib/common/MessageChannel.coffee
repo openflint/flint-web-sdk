@@ -37,7 +37,7 @@ class MessageChannel extends EventEmitter
     open: (url) ->
         if url
             @url = url
-        @wsChannel = new WebSocket url
+        @wsChannel = new WebSocket @url
 
         @wsChannel.onopen = (event) =>
             @emit 'open', event
