@@ -1,21 +1,12 @@
-## How to use SDK
-> please refer to <https://github.com/openflint/flint-web-sdk/tree/gh-pages/doc/receiver> and <https://github.com/openflint/flint-web-sdk/tree/gh-pages/doc/sender> for more information.
+This project includes both web sender sdk and receiver sdk
 
-## install plugin
+## Sender SDK
+Now Sender SDK is available for Firefox OS 2.2. Please download (https://openflint.github.io/flint-web-sdk/out/flint_sender_sdk.js) and add it in your Firefox OS app. Please refer to (https://github.com/openflint/flint-web-sdk/tree/gh-pages/doc/sender) for more information.
 
-### Mac
-```
-unzip downloads/osx/npFlintPlugin.plugin.zip
-cp -r downloads/osx/npFlintPlugin.plugin ~/Library/Internet\ Plug-Ins/
-```
-
-### Linux
-```
-mkdir -p ~/.mozilla/plugins/
-cp downloads/linux/npFlintPlugin.so ~/.mozilla/plugins/
-```
-
-### Windows
-```
-regsvr32 downloads/windows/npFlintPlugin.dll
-```
+## Receiver SDK
+* Just include the JavaScript libraries URL into your receiver apps. 
+  ```html
+      <script src="//openflint.github.io/flint-web-sdk/out/flint_receiver_sdk.js"></script>
+      <script src="//openflint.github.io/flint-web-sdk/out/libs/mediaplayer.js"></script>
+  ```
+Please refer to (https://github.com/openflint/flint-web-sdk/tree/gh-pages/doc/receiver) for more information.
