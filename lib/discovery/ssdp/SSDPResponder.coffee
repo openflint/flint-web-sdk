@@ -15,7 +15,7 @@
 #
 
 EventEmitter = require 'eventemitter3'
-PlatformLoader = require '../../platform/PlatformLoader'
+SocketGenerator = require '../../socket/SocketGenerator'
 
 SEARCH_INTERVAL = 5 * 1000
 
@@ -42,7 +42,7 @@ class SSDPResponder extends EventEmitter
         @started = false
 
     _init: ->
-        @socket = PlatformLoader.createUdpSocket
+        @socket = SocketGenerator.createUdpSocket
             loopback: true
             localPort: SSDP_PORT
         @socket.joinMulticastGroup SSDP_ADDRESS

@@ -17,7 +17,7 @@
 EventEmitter = require 'eventemitter3'
 SSDPResponder = require './SSDPResponder'
 SSDPDevice = require './SSDPDevice'
-PlatformLoader = require '../../platform/PlatformLoader'
+XhrGenerator = require '../../xhr/XhrGenerator'
 
 class SSDPManager extends EventEmitter
 
@@ -51,7 +51,7 @@ class SSDPManager extends EventEmitter
         @ssdp.stop()
 
     _fetchDeviceDesc: (url) ->
-        xhr = PlatformLoader.createXMLHttpRequest()
+        xhr = XhrGenerator.createXMLHttpRequest()
         if not xhr
             throw '_fetchDeviceDesc: failed'
 

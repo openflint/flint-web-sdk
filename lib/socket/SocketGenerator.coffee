@@ -18,18 +18,7 @@ Platform = require '../common/Platform'
 ChromeUdpSocket = require './chrome_app/ChromeUdpSocket'
 FfosUdpSocket = require './ffos/FfosUdpSocket'
 
-class PlatformLoader
-
-    @createXMLHttpRequest: ->
-        platform = Platform.getPlatform()
-        try
-            switch platform.browser
-                when 'ffos'
-                    return new XMLHttpRequest(mozSystem: true)
-                else
-                    return new XMLHttpRequest()
-        catch e
-            console.error 'catch: ', e
+class SocketGenerator
 
     @createUdpSocket: (options)->
         platform = Platform.getPlatform()
@@ -44,4 +33,4 @@ class PlatformLoader
         catch e
             console.error 'catch: ', e
 
-module.exports = PlatformLoader
+module.exports = SocketGenerator

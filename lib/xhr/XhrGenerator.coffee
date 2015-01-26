@@ -14,11 +14,19 @@
 # limitations under the License.
 #
 
-MessageChannel = require '../common/MessageChannel'
+Platform = require '../common/Platform'
 
-class SenderMessageChannel extends MessageChannel
+class XhrGenerator
 
-    constructor: (name, url) ->
-        super name, url
+    @createXMLHttpRequest: ->
+        platform = Platform.getPlatform()
+        try
+            switch platform.browser
+                when 'ffos'
+                    return new XMLHttpRequest(mozSystem: true)
+                else
+                    return new XMLHttpRequest()
+        catch e
+            console.error 'catch: ', e
 
-module.exports = SenderMessageChannel
+module.exports = XhrGenerator

@@ -18,7 +18,7 @@ EventEmitter = require 'eventemitter3'
 SenderMessageChannel = require './SenderMessageChannel'
 SenderMessageBus = require './SenderMessageBus'
 Peer = require '../peerjs/peer'
-PlatformLoader = require '../platform/PlatformLoader'
+XhrGenerator = require '../xhr/XhrGenerator'
 FlintConstants = require '../common/FlintConstants'
 
 class FlintSenderManager extends EventEmitter
@@ -273,7 +273,7 @@ class FlintSenderManager extends EventEmitter
     # callback = => (statusCode, responseText)
     _request: (method, url, headers, data, callback) ->
         console.log 'request: method -> ', method, ', url -> ', url, ', headers -> ', headers
-        xhr = PlatformLoader.getPlatform().createXMLHttpRequest()
+        xhr = XhrGenerator.createXMLHttpRequest()
         if not xhr
             throw 'request: failed'
 
@@ -294,7 +294,7 @@ class FlintSenderManager extends EventEmitter
 
     _createMessageChannel: ->
         if not @defMessageChannel
-            @defMessageChannel = new SenderMessageChannel PlatformLoader, FlintConstants.DEFAULT_CHANNEL_NAME
+            @defMessageChannel = new SenderMessageChannel FlintConstants.DEFAULT_CHANNEL_NAME
             @defMessageChannel.on 'open', () =>
                 console.log 'sender message channel open!!!'
             @defMessageChannel.on 'close', () =>

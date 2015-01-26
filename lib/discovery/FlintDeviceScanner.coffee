@@ -45,7 +45,7 @@ class FlintDeviceScanner extends EventEmitter
 
     _initmDns: ->
         console.info 'init MDNSManager'
-        @mdnsManager = new SSDPManager()
+        @mdnsManager = new MDNSManager()
         @mdnsManager.on 'adddevice', (device) =>
             @_addDevice device
         @mdnsManager.on 'removedevice', (uniqueId) =>

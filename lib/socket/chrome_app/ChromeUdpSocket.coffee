@@ -33,7 +33,6 @@ class ChromeUdpSocket extends EventEmitter
         @loopback_ = options.loopback
 
         @socketId_ = -1
-        @multicastAddr_ = null
 
         @_init()
 
@@ -42,7 +41,7 @@ class ChromeUdpSocket extends EventEmitter
             'persistent': false,
             'name': 'udpSocket',
             'bufferSize': 4096
-        chrome.sockets.udp.create info, (createInfo) =>
+        chrome.sockets.udp.create {}, (createInfo) =>
             @socketId_ = createInfo.socketId
             console.log 'create UdpSocket: ', @socketId_
             chrome.sockets.udp.bind @socketId_, '0.0.0.0', @localPort_, (result) =>
@@ -71,8 +70,6 @@ class ChromeUdpSocket extends EventEmitter
 
 
     joinMulticastGroup: (addr) ->
-        @multicastAddr_ = addr
-
         if @socketId_ is -1
             @.once 'ready', =>
                 chrome.sockets.udp.joinGroup @socketId_, addr, (result)=>

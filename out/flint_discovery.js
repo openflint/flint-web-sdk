@@ -237,7 +237,7 @@ module.exports = FlintDevice;
 
 
 
-},{"eventemitter3":13}],4:[function(require,module,exports){
+},{"eventemitter3":14}],4:[function(require,module,exports){
 var EventEmitter, FlintDevice, FlintDeviceScanner, MDNSManager, SSDPManager,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -286,7 +286,7 @@ FlintDeviceScanner = (function(_super) {
 
   FlintDeviceScanner.prototype._initmDns = function() {
     console.info('init MDNSManager');
-    this.mdnsManager = new SSDPManager();
+    this.mdnsManager = new MDNSManager();
     this.mdnsManager.on('adddevice', (function(_this) {
       return function(device) {
         return _this._addDevice(device);
@@ -357,7 +357,7 @@ module.exports = FlintDeviceScanner;
 
 
 
-},{"./FlintDevice":3,"./mdns/MDNSManager":6,"./ssdp/SSDPManager":8,"eventemitter3":13}],5:[function(require,module,exports){
+},{"./FlintDevice":3,"./mdns/MDNSManager":6,"./ssdp/SSDPManager":8,"eventemitter3":14}],5:[function(require,module,exports){
 window.FlintDeviceScanner = require('./FlintDeviceScanner');
 
 
@@ -392,7 +392,7 @@ module.exports = MDNSManager;
 
 
 
-},{"eventemitter3":13}],7:[function(require,module,exports){
+},{"eventemitter3":14}],7:[function(require,module,exports){
 var FlintDevice, SSDPDevice,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -427,7 +427,7 @@ module.exports = SSDPDevice;
 
 
 },{"../FlintDevice":3}],8:[function(require,module,exports){
-var EventEmitter, PlatformLoader, SSDPDevice, SSDPManager, SSDPResponder,
+var EventEmitter, SSDPDevice, SSDPManager, SSDPResponder, XhrGenerator,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -437,7 +437,7 @@ SSDPResponder = require('./SSDPResponder');
 
 SSDPDevice = require('./SSDPDevice');
 
-PlatformLoader = require('../../platform/PlatformLoader');
+XhrGenerator = require('../../xhr/XhrGenerator');
 
 SSDPManager = (function(_super) {
   __extends(SSDPManager, _super);
@@ -482,7 +482,7 @@ SSDPManager = (function(_super) {
 
   SSDPManager.prototype._fetchDeviceDesc = function(url) {
     var xhr;
-    xhr = PlatformLoader.createXMLHttpRequest();
+    xhr = XhrGenerator.createXMLHttpRequest();
     if (!xhr) {
       throw '_fetchDeviceDesc: failed';
     }
@@ -553,14 +553,14 @@ module.exports = SSDPManager;
 
 
 
-},{"../../platform/PlatformLoader":10,"./SSDPDevice":7,"./SSDPResponder":9,"eventemitter3":13}],9:[function(require,module,exports){
-var EventEmitter, PlatformLoader, SEARCH_INTERVAL, SSDPResponder, SSDP_ADDRESS, SSDP_DISCOVER_MX, SSDP_DISCOVER_PACKET, SSDP_HEADER, SSDP_PORT, SSDP_RESPONSE_HEADER, SSDP_SEARCH_TARGET,
+},{"../../xhr/XhrGenerator":13,"./SSDPDevice":7,"./SSDPResponder":9,"eventemitter3":14}],9:[function(require,module,exports){
+var EventEmitter, SEARCH_INTERVAL, SSDPResponder, SSDP_ADDRESS, SSDP_DISCOVER_MX, SSDP_DISCOVER_PACKET, SSDP_HEADER, SSDP_PORT, SSDP_RESPONSE_HEADER, SSDP_SEARCH_TARGET, SocketGenerator,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 EventEmitter = require('eventemitter3');
 
-PlatformLoader = require('../../platform/PlatformLoader');
+SocketGenerator = require('../../socket/SocketGenerator');
 
 SEARCH_INTERVAL = 5 * 1000;
 
@@ -589,7 +589,7 @@ SSDPResponder = (function(_super) {
   }
 
   SSDPResponder.prototype._init = function() {
-    this.socket = PlatformLoader.createUdpSocket({
+    this.socket = SocketGenerator.createUdpSocket({
       loopback: true,
       localPort: SSDP_PORT
     });
@@ -683,8 +683,8 @@ module.exports = SSDPResponder;
 
 
 
-},{"../../platform/PlatformLoader":10,"eventemitter3":13}],10:[function(require,module,exports){
-var ChromeUdpSocket, FfosUdpSocket, Platform, PlatformLoader;
+},{"../../socket/SocketGenerator":10,"eventemitter3":14}],10:[function(require,module,exports){
+var ChromeUdpSocket, FfosUdpSocket, Platform, SocketGenerator;
 
 Platform = require('../common/Platform');
 
@@ -692,28 +692,10 @@ ChromeUdpSocket = require('./chrome_app/ChromeUdpSocket');
 
 FfosUdpSocket = require('./ffos/FfosUdpSocket');
 
-PlatformLoader = (function() {
-  function PlatformLoader() {}
+SocketGenerator = (function() {
+  function SocketGenerator() {}
 
-  PlatformLoader.createXMLHttpRequest = function() {
-    var e, platform;
-    platform = Platform.getPlatform();
-    try {
-      switch (platform.browser) {
-        case 'ffos':
-          return new XMLHttpRequest({
-            mozSystem: true
-          });
-        default:
-          return new XMLHttpRequest();
-      }
-    } catch (_error) {
-      e = _error;
-      return console.error('catch: ', e);
-    }
-  };
-
-  PlatformLoader.createUdpSocket = function(options) {
+  SocketGenerator.createUdpSocket = function(options) {
     var e, platform;
     platform = Platform.getPlatform();
     try {
@@ -731,11 +713,11 @@ PlatformLoader = (function() {
     }
   };
 
-  return PlatformLoader;
+  return SocketGenerator;
 
 })();
 
-module.exports = PlatformLoader;
+module.exports = SocketGenerator;
 
 
 
@@ -769,7 +751,6 @@ ChromeUdpSocket = (function(_super) {
     this.localPort_ = options.localPort;
     this.loopback_ = options.loopback;
     this.socketId_ = -1;
-    this.multicastAddr_ = null;
     this._init();
   }
 
@@ -780,7 +761,7 @@ ChromeUdpSocket = (function(_super) {
       'name': 'udpSocket',
       'bufferSize': 4096
     };
-    return chrome.sockets.udp.create(info, (function(_this) {
+    return chrome.sockets.udp.create({}, (function(_this) {
       return function(createInfo) {
         _this.socketId_ = createInfo.socketId;
         console.log('create UdpSocket: ', _this.socketId_);
@@ -815,7 +796,6 @@ ChromeUdpSocket = (function(_super) {
   };
 
   ChromeUdpSocket.prototype.joinMulticastGroup = function(addr) {
-    this.multicastAddr_ = addr;
     if (this.socketId_ === -1) {
       return this.once('ready', (function(_this) {
         return function() {
@@ -858,7 +838,7 @@ module.exports = ChromeUdpSocket;
 
 
 
-},{"eventemitter3":13}],12:[function(require,module,exports){
+},{"eventemitter3":14}],12:[function(require,module,exports){
 var EventEmitter, FfosUdpSocket,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -906,7 +886,41 @@ module.exports = FfosUdpSocket;
 
 
 
-},{"eventemitter3":13}],13:[function(require,module,exports){
+},{"eventemitter3":14}],13:[function(require,module,exports){
+var Platform, XhrGenerator;
+
+Platform = require('../common/Platform');
+
+XhrGenerator = (function() {
+  function XhrGenerator() {}
+
+  XhrGenerator.createXMLHttpRequest = function() {
+    var e, platform;
+    platform = Platform.getPlatform();
+    try {
+      switch (platform.browser) {
+        case 'ffos':
+          return new XMLHttpRequest({
+            mozSystem: true
+          });
+        default:
+          return new XMLHttpRequest();
+      }
+    } catch (_error) {
+      e = _error;
+      return console.error('catch: ', e);
+    }
+  };
+
+  return XhrGenerator;
+
+})();
+
+module.exports = XhrGenerator;
+
+
+
+},{"../common/Platform":2}],14:[function(require,module,exports){
 'use strict';
 
 /**
