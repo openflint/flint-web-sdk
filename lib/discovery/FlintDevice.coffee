@@ -24,11 +24,15 @@ class FlintDevice extends EventEmitter
 
         # sub-classes should set these values
         @urlBase = null
+        @host = null
         @friendlyName = null
         @uniqueId = null
 
     getUrlBase: ->
         return @urlBase
+
+    getHost: ->
+        return @host
 
     getName: ->
         return @friendlyName

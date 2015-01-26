@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FlintDevice = require '../../sender/FlintDevice'
+FlintDevice = require '../FlintDevice'
 
 class MDNSDevice extends FlintDevice
 

@@ -178,7 +178,7 @@ module.exports = MessageBus;
 
 
 
-},{"eventemitter3":26}],4:[function(require,module,exports){
+},{"eventemitter3":20}],4:[function(require,module,exports){
 var EventEmitter, MessageChannel,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -281,7 +281,7 @@ module.exports = MessageChannel;
 
 
 
-},{"eventemitter3":26}],5:[function(require,module,exports){
+},{"eventemitter3":20}],5:[function(require,module,exports){
 var BrowserDetect, Platform;
 
 BrowserDetect = require('./BrowserDetect');
@@ -299,6 +299,10 @@ Platform = (function() {
       if (Platform.detector.browser.toLowerCase() === 'firefox') {
         if (window.MozActivity !== void 0) {
           Platform.detector.browser = 'ffos';
+        }
+      } else if (Platform.detector.browser.toLowerCase() === 'chrome') {
+        if (chrome.sockets !== void 0) {
+          Platform.detector.browser = 'chrome_app';
         }
       }
     }
@@ -319,195 +323,6 @@ module.exports = Platform;
 
 
 },{"./BrowserDetect":1}],6:[function(require,module,exports){
-var EventEmitter, MDNSManager,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-EventEmitter = require('eventemitter3');
-
-MDNSManager = (function(_super) {
-  __extends(MDNSManager, _super);
-
-  function MDNSManager() {
-    null;
-  }
-
-  MDNSManager.prototype.start = function() {
-    return null;
-  };
-
-  MDNSManager.prototype.stop = function() {
-    return null;
-  };
-
-  return MDNSManager;
-
-})(EventEmitter);
-
-module.exports = MDNSManager;
-
-
-
-},{"eventemitter3":26}],7:[function(require,module,exports){
-var FlintDevice, SSDPDevice,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-FlintDevice = require('../../sender/FlintDevice');
-
-SSDPDevice = (function(_super) {
-  __extends(SSDPDevice, _super);
-
-  function SSDPDevice(deviceDesc) {
-    SSDPDevice.__super__.constructor.apply(this, arguments);
-    this.urlBase = deviceDesc.urlBase;
-    if (this.urlBase.slice(-5) !== ':9431') {
-      this.urlBase += ':9431';
-    }
-    this.friendlyName = deviceDesc.friendlyName;
-    this.uniqueId = deviceDesc.udn;
-  }
-
-  SSDPDevice.prototype.getDeviceType = function() {
-    return 'ssdp';
-  };
-
-  return SSDPDevice;
-
-})(FlintDevice);
-
-module.exports = SSDPDevice;
-
-
-
-},{"../../sender/FlintDevice":20}],8:[function(require,module,exports){
-var EventEmitter, PlatformLoader, SSDPDevice, SSDPManager,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-EventEmitter = require('eventemitter3');
-
-PlatformLoader = require('../../platform/PlatformLoader');
-
-SSDPDevice = require('./SSDPDevice');
-
-SSDPManager = (function(_super) {
-  __extends(SSDPManager, _super);
-
-  function SSDPManager() {
-    var options;
-    this.devices = {};
-    options = {
-      st: 'urn:dial-multiscreen-org:service:dial:1'
-    };
-    this.ssdp = PlatformLoader.getPlatform().createSSDPResponder(options);
-    this.ssdp.on('serviceFound', (function(_this) {
-      return function(url) {
-        if (!_this.devices[url]) {
-          _this.devices[url] = url;
-          return _this._fetchDeviceDesc(url);
-        } else {
-          if (_this.devices[url].triggerTimer) {
-            return _this.devices[url].triggerTimer();
-          }
-        }
-      };
-    })(this));
-    this.ssdp.on('serviceLost', (function(_this) {
-      return function(url) {
-        var device;
-        if (_this.devices[url]) {
-          device = _this.devices[url];
-          _this.emit('removedevice', device);
-          device.clear();
-          return delete _this.devices[url];
-        }
-      };
-    })(this));
-  }
-
-  SSDPManager.prototype.start = function() {
-    return this.ssdp.start();
-  };
-
-  SSDPManager.prototype.stop = function() {
-    return this.ssdp.stop();
-  };
-
-  SSDPManager.prototype._fetchDeviceDesc = function(url) {
-    var xhr;
-    xhr = PlatformLoader.getPlatform().createXMLHttpRequest();
-    if (!xhr) {
-      throw '_fetchDeviceDesc: failed';
-    }
-    xhr.open('GET', url);
-    xhr.onreadystatechange = (function(_this) {
-      return function() {
-        if (xhr.readyState === 4) {
-          return _this._parseDeviceDesc(xhr.responseText, url);
-        }
-      };
-    })(this);
-    return xhr.send('');
-  };
-
-  SSDPManager.prototype._parseDeviceDesc = function(data, url) {
-    var devices, e, parser, urlBase, urls, xml;
-    try {
-      xml = null;
-      if (window.DOMParser) {
-        parser = new DOMParser();
-        xml = parser.parseFromString(data, "text/xml");
-      } else {
-        xml = new ActiveXObject("Microsoft.XMLDOM");
-        xml.async = "false";
-        xml.loadXML(data);
-      }
-      urlBase = null;
-      urls = xml.querySelectorAll('URLBase');
-      if (urls && urls.length > 0) {
-        urlBase = urls[0].innerHTML;
-      }
-      devices = xml.querySelectorAll('device');
-      if (devices.length > 0) {
-        return this._parseSingleDeviceDesc(devices[0], urlBase, url);
-      }
-    } catch (_error) {
-      e = _error;
-      return console.error(e);
-    }
-  };
-
-  SSDPManager.prototype._parseSingleDeviceDesc = function(deviceNode, urlBase, url) {
-    var device, deviceType, friendlyName, manufacturer, modelName, udn;
-    deviceType = deviceNode.querySelector('deviceType').innerHTML;
-    udn = deviceNode.querySelector("UDN").innerHTML;
-    friendlyName = deviceNode.querySelector('friendlyName').innerHTML;
-    manufacturer = deviceNode.querySelector('manufacturer').innerHTML;
-    modelName = deviceNode.querySelector('modelName').innerHTML;
-    device = new SSDPDevice({
-      uniqueId: udn,
-      urlBase: urlBase,
-      deviceType: deviceType,
-      udn: udn,
-      friendlyName: friendlyName,
-      manufacturer: manufacturer,
-      modelName: modelName
-    });
-    device.triggerTimer();
-    this.devices[url] = device;
-    return this.emit('adddevice', device);
-  };
-
-  return SSDPManager;
-
-})(EventEmitter);
-
-module.exports = SSDPManager;
-
-
-
-},{"../../platform/PlatformLoader":17,"./SSDPDevice":7,"eventemitter3":26}],9:[function(require,module,exports){
 module.exports.RTCSessionDescription = window.RTCSessionDescription ||
 	window.mozRTCSessionDescription;
 module.exports.RTCPeerConnection = window.RTCPeerConnection ||
@@ -515,7 +330,7 @@ module.exports.RTCPeerConnection = window.RTCPeerConnection ||
 module.exports.RTCIceCandidate = window.RTCIceCandidate ||
 	window.mozRTCIceCandidate;
 
-},{}],10:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var util = require('./util');
 var EventEmitter = require('eventemitter3');
 var Negotiator = require('./negotiator');
@@ -784,7 +599,7 @@ DataConnection.prototype.handleMessage = function(message) {
 
 module.exports = DataConnection;
 
-},{"./negotiator":12,"./util":15,"eventemitter3":26,"reliable":29}],11:[function(require,module,exports){
+},{"./negotiator":9,"./util":12,"eventemitter3":20,"reliable":23}],8:[function(require,module,exports){
 var util = require('./util');
 var EventEmitter = require('eventemitter3');
 var Negotiator = require('./negotiator');
@@ -881,7 +696,7 @@ MediaConnection.prototype.close = function() {
 
 module.exports = MediaConnection;
 
-},{"./negotiator":12,"./util":15,"eventemitter3":26}],12:[function(require,module,exports){
+},{"./negotiator":9,"./util":12,"eventemitter3":20}],9:[function(require,module,exports){
 var util = require('./util');
 var RTCPeerConnection = require('./adapter').RTCPeerConnection;
 var RTCSessionDescription = require('./adapter').RTCSessionDescription;
@@ -1192,7 +1007,7 @@ Negotiator.handleCandidate = function(connection, ice) {
 
 module.exports = Negotiator;
 
-},{"./adapter":9,"./util":15}],13:[function(require,module,exports){
+},{"./adapter":6,"./util":12}],10:[function(require,module,exports){
 var util = require('./util');
 var EventEmitter = require('eventemitter3');
 var Socket = require('./socket');
@@ -1691,7 +1506,7 @@ Peer.prototype.listAllPeers = function(cb) {
 
 module.exports = Peer;
 
-},{"./dataconnection":10,"./mediaconnection":11,"./socket":14,"./util":15,"eventemitter3":26}],14:[function(require,module,exports){
+},{"./dataconnection":7,"./mediaconnection":8,"./socket":11,"./util":12,"eventemitter3":20}],11:[function(require,module,exports){
 var util = require('./util');
 var EventEmitter = require('eventemitter3');
 
@@ -1907,7 +1722,7 @@ Socket.prototype.close = function () {
 
 module.exports = Socket;
 
-},{"./util":15,"eventemitter3":26}],15:[function(require,module,exports){
+},{"./util":12,"eventemitter3":20}],12:[function(require,module,exports){
 var defaultConfig = {'iceServers': [{ 'url': 'stun:stun.l.google.com:19302' }]};
 var dataCount = 1;
 
@@ -2223,71 +2038,52 @@ var util = {
 
 module.exports = util;
 
-},{"./adapter":9,"js-binarypack":27}],16:[function(require,module,exports){
-var PlatformDummy;
-
-PlatformDummy = (function() {
-  function PlatformDummy() {
-    console.log('create PlatformDummy');
-  }
-
-  PlatformDummy.prototype.createXMLHttpRequest = function() {
-    return new XMLHttpRequest();
-  };
-
-  PlatformDummy.prototype.createSSDPResponder = function(options) {
-    throw 'Not Implemented';
-  };
-
-  PlatformDummy.prototype.createMDNSResponder = function(options) {
-    throw 'Not Implemented';
-  };
-
-  return PlatformDummy;
-
-})();
-
-module.exports = PlatformDummy;
-
-
-
-},{}],17:[function(require,module,exports){
-var Platform, PlatformDummy, PlatformFfos, PlatformLoader;
-
-PlatformDummy = require('./PlatformDummy');
-
-PlatformFfos = require('./ffos/PlatformFfos');
+},{"./adapter":6,"js-binarypack":21}],13:[function(require,module,exports){
+var ChromeUdpSocket, FfosUdpSocket, Platform, PlatformLoader;
 
 Platform = require('../common/Platform');
+
+ChromeUdpSocket = require('./chrome_app/ChromeUdpSocket');
+
+FfosUdpSocket = require('./ffos/FfosUdpSocket');
 
 PlatformLoader = (function() {
   function PlatformLoader() {}
 
-  PlatformLoader.platform = null;
-
-  PlatformLoader.getPlatform = function() {
+  PlatformLoader.createXMLHttpRequest = function() {
     var e, platform;
-    if (!PlatformLoader.platform) {
-      platform = Platform.getPlatform();
-      console.info('Platform is : ', platform.browser);
-      try {
-        switch (platform.browser) {
-          case 'ffos':
-            PlatformLoader.platform = new PlatformFfos();
-            break;
-          default:
-            PlatformLoader.platform = new PlatformDummy();
-        }
-      } catch (_error) {
-        e = _error;
-        PlatformLoader.platform = null;
-        console.error('catch: ', e);
+    platform = Platform.getPlatform();
+    try {
+      switch (platform.browser) {
+        case 'ffos':
+          return new XMLHttpRequest({
+            mozSystem: true
+          });
+        default:
+          return new XMLHttpRequest();
       }
-      if (!PlatformLoader.platform) {
-        PlatformLoader.platform = new PlatformDummy();
-      }
+    } catch (_error) {
+      e = _error;
+      return console.error('catch: ', e);
     }
-    return PlatformLoader.platform;
+  };
+
+  PlatformLoader.createUdpSocket = function(options) {
+    var e, platform;
+    platform = Platform.getPlatform();
+    try {
+      switch (platform.browser) {
+        case 'ffos':
+          return new FfosUdpSocket(options);
+        case 'chrome_app':
+          return new ChromeUdpSocket(options);
+        default:
+          return null;
+      }
+    } catch (_error) {
+      e = _error;
+      return console.error('catch: ', e);
+    }
   };
 
   return PlatformLoader;
@@ -2298,355 +2094,174 @@ module.exports = PlatformLoader;
 
 
 
-},{"../common/Platform":5,"./PlatformDummy":16,"./ffos/PlatformFfos":18}],18:[function(require,module,exports){
-var PlatformFfos, SSDPResponder;
-
-SSDPResponder = require('./SSDPResponder');
-
-PlatformFfos = (function() {
-  function PlatformFfos() {
-    console.log('create PlatformFfos');
-  }
-
-  PlatformFfos.prototype.createXMLHttpRequest = function() {
-    return new XMLHttpRequest({
-      mozSystem: true
-    });
-  };
-
-  PlatformFfos.prototype.createSSDPResponder = function(options) {
-    return new SSDPResponder(this, options);
-  };
-
-  PlatformFfos.prototype.createMDNSResponder = function(options) {
-    throw 'Not Implemented';
-  };
-
-  return PlatformFfos;
-
-})();
-
-module.exports = PlatformFfos;
-
-
-
-},{"./SSDPResponder":19}],19:[function(require,module,exports){
-var EventEmitter, FfoxSSDPResponder, SEARCH_INTERVAL, SSDP_ADDRESS, SSDP_DISCOVER_MX, SSDP_DISCOVER_PACKET, SSDP_HEADER, SSDP_PORT, SSDP_RESPONSE_HEADER, SSDP_SEARCH_TARGET,
+},{"../common/Platform":5,"./chrome_app/ChromeUdpSocket":14,"./ffos/FfosUdpSocket":15}],14:[function(require,module,exports){
+var ChromeUdpSocket, EventEmitter,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 EventEmitter = require('eventemitter3');
 
-SEARCH_INTERVAL = 5 * 1000;
+ChromeUdpSocket = (function(_super) {
+  __extends(ChromeUdpSocket, _super);
 
-SSDP_PORT = 1900;
+  ChromeUdpSocket.ab2str = function(buf) {
+    return String.fromCharCode.apply(null, new Uint8Array(buf));
+  };
 
-SSDP_ADDRESS = '239.255.255.250';
+  ChromeUdpSocket.str2ab = function(str) {
+    var buf, bufView, i, _;
+    buf = new ArrayBuffer(str.length);
+    bufView = new Uint8Array(buf);
+    for (i in str) {
+      _ = str[i];
+      bufView[i] = str.charCodeAt(i);
+    }
+    return buf;
+  };
 
-SSDP_DISCOVER_MX = 10;
-
-SSDP_DISCOVER_PACKET = 'M-SEARCH * HTTP/1.1\r\n' + 'HOST: ' + SSDP_ADDRESS + ':' + SSDP_PORT + '\r\n' + 'MAN: \"ssdp:discover\"\r\n' + 'MX: ' + SSDP_DISCOVER_MX + '\r\n' + 'ST: %SEARCH_TARGET%\r\n\r\n';
-
-SSDP_RESPONSE_HEADER = /HTTP\/\d{1}\.\d{1} \d+ .*/;
-
-SSDP_HEADER = /^([^:]+):\s*(.*)$/;
-
-SSDP_SEARCH_TARGET = 'urn:dial-multiscreen-org:service:dial:1';
-
-FfoxSSDPResponder = (function(_super) {
-  __extends(FfoxSSDPResponder, _super);
-
-  function FfoxSSDPResponder(pluginLoader, options) {
-    this.pluginLoader = pluginLoader;
+  function ChromeUdpSocket(options) {
     this.options = options;
-    this.socket = null;
-    this.searchTimerId = null;
-    this.started = false;
+    this.localPort_ = options.localPort;
+    this.loopback_ = options.loopback;
+    this.socketId_ = -1;
+    this.multicastAddr_ = null;
+    this._init();
   }
 
-  FfoxSSDPResponder.prototype._init = function() {
-    this.socket = new UDPSocket({
-      loopback: true,
-      localPort: SSDP_PORT
-    });
-    this.socket.joinMulticastGroup(SSDP_ADDRESS);
-    return this.socket.onmessage = (function(_this) {
-      return function(event) {
-        var msg;
-        msg = String.fromCharCode.apply(null, new Uint8Array(event.data));
-        return _this._onData(msg);
+  ChromeUdpSocket.prototype._init = function() {
+    var info;
+    info = {
+      'persistent': false,
+      'name': 'udpSocket',
+      'bufferSize': 4096
+    };
+    return chrome.sockets.udp.create(info, (function(_this) {
+      return function(createInfo) {
+        _this.socketId_ = createInfo.socketId;
+        console.log('create UdpSocket: ', _this.socketId_);
+        return chrome.sockets.udp.bind(_this.socketId_, '0.0.0.0', _this.localPort_, function(result) {
+          console.log('bind UdpSocket: port=', _this.localPort_, ', result=', result);
+          chrome.sockets.udp.onReceive.addListener(function(info) {
+            if (_this.socketId_ === info.socketId) {
+              return _this._onMessage(ChromeUdpSocket.ab2str(info.data));
+            }
+          });
+          chrome.sockets.udp.onReceive.addListener(function(info) {
+            if (_this.socketId_ === info.socketId) {
+              return _this._onError('error');
+            }
+          });
+          return _this.emit('ready');
+        });
       };
-    })(this);
+    })(this));
   };
 
-  FfoxSSDPResponder.prototype.start = function() {
-    if (this.started) {
-      throw 'FfosSSDPResponder already started';
+  ChromeUdpSocket.prototype._onMessage = function(data) {
+    if (this.onPacketReceived) {
+      return this.onPacketReceived(data);
     }
-    this.started = true;
-    this._init();
-    this.searchTimerId = setInterval(((function(_this) {
-      return function() {
-        return _this._search();
-      };
-    })(this)), SEARCH_INTERVAL);
-    return this._search();
   };
 
-  FfoxSSDPResponder.prototype._search = function() {
-    var data, _data;
-    data = SSDP_DISCOVER_PACKET;
-    _data = data.replace('%SEARCH_TARGET%', SSDP_SEARCH_TARGET);
-    return this.socket.send(_data, SSDP_ADDRESS, SSDP_PORT);
+  ChromeUdpSocket.prototype._onError = function(error) {
+    if (this.onerror) {
+      return this.onerror(error);
+    }
   };
 
-  FfoxSSDPResponder.prototype.stop = function() {
-    if (!this.started) {
-      console.warn('FfosSSDPResponder is not started');
+  ChromeUdpSocket.prototype.joinMulticastGroup = function(addr) {
+    this.multicastAddr_ = addr;
+    if (this.socketId_ === -1) {
+      return this.once('ready', (function(_this) {
+        return function() {
+          return chrome.sockets.udp.joinGroup(_this.socketId_, addr, function(result) {
+            return console.log('joinGroup UdpSocket: addr=', addr, ', result=', result);
+          });
+        };
+      })(this));
+    } else {
+      return chrome.sockets.udp.joinGroup(this.socketId_, addr, (function(_this) {
+        return function(result) {
+          return console.log('joinGroup UdpSocket: addr=', addr, ', result=', result);
+        };
+      })(this));
+    }
+  };
+
+  ChromeUdpSocket.prototype.send = function(data, addr, port) {
+    var _data;
+    if (!this.socketId_) {
       return;
     }
-    this.started = false;
-    if (this.searchTimerId) {
-      return clearInterval(this.searchTimerId);
-    }
-  };
-
-  FfoxSSDPResponder.prototype._onData = function(data) {
-    var firstLine, headers, lines, method;
-    lines = data.toString().split('\r\n');
-    firstLine = lines.shift();
-    method = SSDP_RESPONSE_HEADER.test(firstLine) ? 'RESPONSE' : firstLine.split(' ')[0].toUpperCase();
-    headers = {};
-    lines.forEach((function(_this) {
-      return function(line) {
-        var pairs;
-        if (line.length) {
-          pairs = line.match(SSDP_HEADER);
-          if (pairs) {
-            return headers[pairs[1].toLowerCase()] = pairs[2];
-          }
+    _data = ChromeUdpSocket.str2ab(data);
+    return chrome.sockets.udp.send(this.socketId_, _data, addr, port, (function(_this) {
+      return function(sendInfo) {
+        if (sendInfo.resultCode < 0) {
+          return console.error('UdpSocket: send error!!!');
+        } else {
+          return console.log('UdpSocket: send success, ', sendInfo.bytesSent);
         }
       };
     })(this));
-    if (method === 'M-SEARCH') {
-
-    } else if (method === 'RESPONSE') {
-      return this._onResponse(headers);
-    } else if (method === 'NOTIFY') {
-      return this._onNotify(headers);
-    }
   };
 
-  FfoxSSDPResponder.prototype._onResponse = function(headers) {
-    if (headers.location && (this.options.st === headers.st)) {
-      return this.emit('serviceFound', headers.location);
-    }
-  };
-
-  FfoxSSDPResponder.prototype._onNotify = function(headers) {
-    if (headers.location && (this.options.st === headers.nt)) {
-      if (headers.nts === 'ssdp:alive') {
-        return this.emit('serviceFound', headers.location);
-      } else if (headers.nts === 'ssdp:byebye') {
-        return this.emit('serviceLost', headers.location);
-      }
-    }
-  };
-
-  return FfoxSSDPResponder;
+  return ChromeUdpSocket;
 
 })(EventEmitter);
 
-module.exports = FfoxSSDPResponder;
+module.exports = ChromeUdpSocket;
 
 
 
-},{"eventemitter3":26}],20:[function(require,module,exports){
-var EventEmitter, FlintDevice,
+},{"eventemitter3":20}],15:[function(require,module,exports){
+var EventEmitter, FfosUdpSocket,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 EventEmitter = require('eventemitter3');
 
-FlintDevice = (function(_super) {
-  __extends(FlintDevice, _super);
+FfosUdpSocket = (function(_super) {
+  __extends(FfosUdpSocket, _super);
 
-  function FlintDevice() {
-    this.timeoutId = null;
-    this.timeout = 60 * 1000;
-    this.urlBase = null;
-    this.friendlyName = null;
-    this.uniqueId = null;
+  function FfosUdpSocket(options) {
+    this.options = options;
+    this.localPort_ = options.localPort;
+    this.loopback_ = options.loopback;
+    this.socket_ = new UDPSocket(options);
+    this.socket.onmessage = (function(_this) {
+      return function(event) {
+        var data;
+        data = String.fromCharCode.apply(null, new Uint8Array(event.data));
+        return _onMessage(data);
+      };
+    })(this);
   }
 
-  FlintDevice.prototype.getUrlBase = function() {
-    return this.urlBase;
-  };
-
-  FlintDevice.prototype.getName = function() {
-    return this.friendlyName;
-  };
-
-  FlintDevice.prototype.getUniqueId = function() {
-    return this.uniqueId;
-  };
-
-  FlintDevice.prototype.getDeviceType = function() {
-    return null;
-  };
-
-  FlintDevice.prototype.triggerTimer = function() {
-    this._clearTimer();
-    return this.timeoutId = setTimeout(((function(_this) {
-      return function() {
-        return _this._onTimeout();
-      };
-    })(this)), this.timeout);
-  };
-
-  FlintDevice.prototype.clear = function() {
-    return this._clearTimer();
-  };
-
-  FlintDevice.prototype._clearTimer = function() {
-    if (this.timeoutId) {
-      return clearTimeout(this.timeoutId);
+  FfosUdpSocket.prototype._onMessage = function(data) {
+    if (this.onPacketReceived) {
+      return this.onPacketReceived(data);
     }
   };
 
-  FlintDevice.prototype._onTimeout = function() {
-    return this.emit('devicetimeout', this.uniqueId);
+  FfosUdpSocket.prototype.joinMulticastGroup = function(addr) {
+    var _ref;
+    return (_ref = this.socket) != null ? _ref.joinMulticastGroup(addr) : void 0;
   };
 
-  return FlintDevice;
+  FfosUdpSocket.prototype.send = function(data, addr, port) {
+    var _ref;
+    return (_ref = this.socket) != null ? _ref.send(data, addr, port) : void 0;
+  };
+
+  return FfosUdpSocket;
 
 })(EventEmitter);
 
-module.exports = FlintDevice;
+module.exports = FfosUdpSocket;
 
 
 
-},{"eventemitter3":26}],21:[function(require,module,exports){
-var EventEmitter, FlintDevice, FlintDeviceScanner, MDNSManager, SSDPManager,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-EventEmitter = require('eventemitter3');
-
-FlintDevice = require('./FlintDevice');
-
-SSDPManager = require('../discovery/ssdp/SSDPManager');
-
-MDNSManager = require('../discovery/mdns/MDNSManager');
-
-FlintDeviceScanner = (function(_super) {
-  var INTERVAL;
-
-  __extends(FlintDeviceScanner, _super);
-
-  INTERVAL = 10 * 1000;
-
-  function FlintDeviceScanner() {
-    this.devices = {};
-    this.ssdpManager = null;
-    this.mdnsManager = null;
-    this._init();
-  }
-
-  FlintDeviceScanner.prototype._init = function() {
-    this._initSSDP();
-    return this._initmDns();
-  };
-
-  FlintDeviceScanner.prototype._initSSDP = function() {
-    console.info('init SSDPManager');
-    this.ssdpManager = new SSDPManager();
-    this.ssdpManager.on('adddevice', (function(_this) {
-      return function(device) {
-        return _this._addDevice(device);
-      };
-    })(this));
-    return this.ssdpManager.on('removedevice', (function(_this) {
-      return function(uniqueId) {
-        return _this._removeDevice(uniqueId);
-      };
-    })(this));
-  };
-
-  FlintDeviceScanner.prototype._initmDns = function() {
-    console.info('init MDNSManager');
-    this.mdnsManager = new SSDPManager();
-    this.mdnsManager.on('adddevice', (function(_this) {
-      return function(device) {
-        return _this._addDevice(device);
-      };
-    })(this));
-    return this.mdnsManager.on('removedevice', (function(_this) {
-      return function(uniqueId) {
-        return _this._removeDevice(uniqueId);
-      };
-    })(this));
-  };
-
-  FlintDeviceScanner.prototype._addDevice = function(device) {
-    var uniqueId;
-    uniqueId = device.getUniqueId();
-    if (!this.devices[uniqueId]) {
-      console.log('found device: ', device.getName());
-      this.devices[uniqueId] = device;
-      device.on('devicetimeout', (function(_this) {
-        return function(_uniqueId) {
-          return _this._removeDevice(_uniqueId);
-        };
-      })(this));
-      return this.emit('devicefound', device);
-    }
-  };
-
-  FlintDeviceScanner.prototype._removeDevice = function(uniqueId) {
-    if (this.devices[uniqueId]) {
-      console.warn('found device: ', this.devices[uniqueId].getName());
-      this.emit('devicegone', this.devices[uniqueId]);
-      return delete this.devices[uniqueId];
-    }
-  };
-
-  FlintDeviceScanner.prototype.start = function() {
-    var _ref, _ref1;
-    if ((_ref = this.ssdpManager) != null) {
-      _ref.start();
-    }
-    return (_ref1 = this.mdnsManager) != null ? _ref1.start() : void 0;
-  };
-
-  FlintDeviceScanner.prototype.stop = function() {
-    var _ref, _ref1;
-    if ((_ref = this.ssdpManager) != null) {
-      _ref.stop();
-    }
-    return (_ref1 = this.mdnsManager) != null ? _ref1.stop() : void 0;
-  };
-
-  FlintDeviceScanner.prototype.getDeviceList = function() {
-    var dList, value, _, _ref;
-    dList = [];
-    _ref = this.devices;
-    for (_ in _ref) {
-      value = _ref[_];
-      dList.push(value);
-    }
-    return dList;
-  };
-
-  return FlintDeviceScanner;
-
-})(EventEmitter);
-
-module.exports = FlintDeviceScanner;
-
-
-
-},{"../discovery/mdns/MDNSManager":6,"../discovery/ssdp/SSDPManager":8,"./FlintDevice":20,"eventemitter3":26}],22:[function(require,module,exports){
+},{"eventemitter3":20}],16:[function(require,module,exports){
 var EventEmitter, FlintConstants, FlintSenderManager, Peer, PlatformLoader, SenderMessageBus, SenderMessageChannel,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -2666,18 +2281,17 @@ FlintConstants = require('../common/FlintConstants');
 FlintSenderManager = (function(_super) {
   __extends(FlintSenderManager, _super);
 
-  function FlintSenderManager(appId, urlBase, useHeartbeat) {
+  function FlintSenderManager(appId, device, useHeartbeat) {
+    var _ref, _ref1;
     this.appId = appId;
-    this.urlBase = urlBase;
+    this.device = device;
     this.useHeartbeat = useHeartbeat;
-    if (!this.appId) {
+    if (!this.appId || !this.device) {
       throw 'FlintSenderManager constructor error';
     }
-    if (this.urlBase !== void 0) {
-      this.serviceUrl = this.urlBase + '/apps/' + this.appId;
-      this.host = this.urlBase.replace('http://', '');
-      this.host = this.host.replace(':9431', '');
-    }
+    this.urlBase = (_ref = this.device) != null ? _ref.getUrlBase() : void 0;
+    this.serviceUrl = this.urlBase + '/apps/' + this.appId;
+    this.host = (_ref1 = this.device) != null ? _ref1.getHost() : void 0;
     if (this.useHeartbeat === void 0) {
       this.useHeartbeat = true;
     }
@@ -2689,14 +2303,6 @@ FlintSenderManager = (function(_super) {
     this.defMessageChannel = null;
     this.messageBusList = {};
   }
-
-  FlintSenderManager.prototype.setServiceUrl = function(urlBase) {
-    this.urlBase = urlBase;
-    this.serviceUrl = this.urlBase + '/apps/' + this.appId;
-    this.host = this.urlBase.replace('http://', '');
-    this.host = this.host.replace(':9431', '');
-    return console.log('set service url ->', this.serviceUrl);
-  };
 
   FlintSenderManager.prototype.getAdditionalData = function() {
     return this.additionalData['customData'];
@@ -3117,7 +2723,7 @@ module.exports = FlintSenderManager;
 
 
 
-},{"../common/FlintConstants":2,"../peerjs/peer":13,"../platform/PlatformLoader":17,"./SenderMessageBus":23,"./SenderMessageChannel":24,"eventemitter3":26}],23:[function(require,module,exports){
+},{"../common/FlintConstants":2,"../peerjs/peer":10,"../platform/PlatformLoader":13,"./SenderMessageBus":17,"./SenderMessageChannel":18,"eventemitter3":20}],17:[function(require,module,exports){
 var MessageBus, SenderMessageBus,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3164,7 +2770,7 @@ module.exports = SenderMessageBus;
 
 
 
-},{"../common/MessageBus":3}],24:[function(require,module,exports){
+},{"../common/MessageBus":3}],18:[function(require,module,exports){
 var MessageChannel, SenderMessageChannel,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -3187,14 +2793,12 @@ module.exports = SenderMessageChannel;
 
 
 
-},{"../common/MessageChannel":4}],25:[function(require,module,exports){
-window.FlintDeviceScanner = require('./FlintDeviceScanner');
-
+},{"../common/MessageChannel":4}],19:[function(require,module,exports){
 window.FlintSenderManager = require('./FlintSenderManager');
 
 
 
-},{"./FlintDeviceScanner":21,"./FlintSenderManager":22}],26:[function(require,module,exports){
+},{"./FlintSenderManager":16}],20:[function(require,module,exports){
 'use strict';
 
 /**
@@ -3425,7 +3029,7 @@ EventEmitter.EventEmitter3 = EventEmitter;
 //
 module.exports = EventEmitter;
 
-},{}],27:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var BufferBuilder = require('./bufferbuilder').BufferBuilder;
 var binaryFeatures = require('./bufferbuilder').binaryFeatures;
 
@@ -3946,7 +3550,7 @@ function utf8Length(str){
   }
 }
 
-},{"./bufferbuilder":28}],28:[function(require,module,exports){
+},{"./bufferbuilder":22}],22:[function(require,module,exports){
 var binaryFeatures = {};
 binaryFeatures.useBlobBuilder = (function(){
   try {
@@ -4012,7 +3616,7 @@ BufferBuilder.prototype.getBuffer = function() {
 
 module.exports.BufferBuilder = BufferBuilder;
 
-},{}],29:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 var util = require('./util');
 
 /**
@@ -4332,7 +3936,7 @@ Reliable.prototype.onmessage = function(msg) {};
 
 module.exports.Reliable = Reliable;
 
-},{"./util":30}],30:[function(require,module,exports){
+},{"./util":24}],24:[function(require,module,exports){
 var BinaryPack = require('js-binarypack');
 
 var util = {
@@ -4429,4 +4033,4 @@ var util = {
 
 module.exports = util;
 
-},{"js-binarypack":27}]},{},[25]);
+},{"js-binarypack":21}]},{},[19]);

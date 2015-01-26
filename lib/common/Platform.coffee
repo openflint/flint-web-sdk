@@ -26,7 +26,9 @@ class Platform
             if Platform.detector.browser.toLowerCase() is 'firefox'
                 if window.MozActivity isnt undefined
                     Platform.detector.browser = 'ffos'
-
+            else if Platform.detector.browser.toLowerCase() is 'chrome'
+                if chrome.sockets isnt undefined
+                    Platform.detector.browser = 'chrome_app'
         platform =
             browser: Platform.detector.browser.toLowerCase()
             version: Platform.detector.version.toLowerCase()

@@ -19,6 +19,13 @@ module.exports = (grunt) ->
                     transform: ['coffeeify']
                     browserifyOptions:
                         extensions: ['.coffee']
+            discovery:
+                files:
+                    'out/flint_discovery.js': ['lib/discovery/exports.coffee']
+                options:
+                    transform: ['coffeeify']
+                    browserifyOptions:
+                        extensions: ['.coffee']
 
         uglify:
             sender:
@@ -29,33 +36,50 @@ module.exports = (grunt) ->
                 options: { mangle: true, compress: true }
                 src: 'out/flint_receiver_sdk.js'
                 dest: 'out/flint_receiver_sdk.min.js'
+            discovery:
+                options: { mangle: true, compress: true }
+                src: 'out/flint_discovery.js'
+                dest: 'out/flint_discovery.min.js'
 
         concat:
             sender:
                 options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. '+
+                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
                         'Copyright(C) 2013-2014 www.OpenFlint.org */'
                 src: 'out/flint_sender_sdk.js'
                 dest: 'out/flint_sender_sdk.js'
             sender_prod:
                 options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. '+
+                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
                         'Copyright(C) 2013-2014 www.OpenFlint.org */'
                 src: 'out/flint_sender_sdk.min.js'
                 dest: 'out/flint_sender_sdk.min.js'
 
             receiver:
                 options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. '+
+                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
                         'Copyright(C) 2013-2014 www.OpenFlint.org */'
                 src: 'out/flint_receiver_sdk.js'
                 dest: 'out/flint_receiver_sdk.js'
             receiver_prod:
                 options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. '+
+                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
                         'Copyright(C) 2013-2014 www.OpenFlint.org */'
                 src: 'out/flint_receiver_sdk.min.js'
                 dest: 'out/flint_receiver_sdk.min.js'
+
+            discovery:
+                options:
+                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
+                        'Copyright(C) 2013-2014 www.OpenFlint.org */'
+                src: 'out/flint_discovery.js'
+                dest: 'out/flint_discovery.js'
+            discovery_prod:
+                options:
+                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
+                        'Copyright(C) 2013-2014 www.OpenFlint.org */'
+                src: 'out/flint_discovery.min.js'
+                dest: 'out/flint_discovery.min.js'
 
     # Load the plugin that provides the "coffee" task.
 

@@ -23,14 +23,13 @@ FlintConstants = require '../common/FlintConstants'
 
 class FlintSenderManager extends EventEmitter
 
-    constructor: (@appId, @urlBase, @useHeartbeat) ->
-        if not @appId
+    constructor: (@appId, @device, @useHeartbeat) ->
+        if not @appId or not @device
             throw 'FlintSenderManager constructor error'
 
-        if @urlBase isnt undefined
-            @serviceUrl = @urlBase + '/apps/' + @appId
-            @host = @urlBase.replace 'http://', ''
-            @host = @host.replace ':9431', ''
+        @urlBase = @device?.getUrlBase()
+        @serviceUrl = @urlBase + '/apps/' + @appId
+        @host = @device?.getHost()
 
         if @useHeartbeat is undefined
             @useHeartbeat = true
@@ -44,12 +43,6 @@ class FlintSenderManager extends EventEmitter
 
         @defMessageChannel = null
         @messageBusList = {}
-
-    setServiceUrl: (@urlBase) ->
-        @serviceUrl = @urlBase + '/apps/' + @appId
-        @host = @urlBase.replace 'http://', ''
-        @host = @host.replace ':9431', ''
-        console.log 'set service url ->', @serviceUrl
 
     #
     # event: 'customData' + 'available',
@@ -105,17 +98,17 @@ class FlintSenderManager extends EventEmitter
                 for i of items
                     if items[i].tagName and items[i].innerHTML
                         _tmpAdditionalData[items[i].tagName] = items[i].innerHTML
-#                changed = false
+                #                changed = false
                 for key, value of _tmpAdditionalData
                     if @additionalData[key] isnt value
 #                        changed = true
                         @emit key + 'available', value
-#                if not changed
-#                    _additionalData = @additionalData
-#                    for key, value of _additionalData
-#                        if _tmpAdditionalData[key] isnt value
-#                            changed = true
-#                            break
+                #                if not changed
+                #                    _additionalData = @additionalData
+                #                    for key, value of _additionalData
+                #                        if _tmpAdditionalData[key] isnt value
+                #                            changed = true
+                #                            break
                 @additionalData = _tmpAdditionalData
 #                if changed
 #                    @emit 'additionaldatachanged', @additionalData
@@ -150,7 +143,8 @@ class FlintSenderManager extends EventEmitter
         if result
             # to get additionaldata before starting heartbeat
             console.log type, ' is ok, getState once'
-            setTimeout (=> @getState()), 500
+            setTimeout (=>
+                @getState()), 500
         else
             console.log type, ' is failed, stop heartbeat'
             @_stopHeartbeat()

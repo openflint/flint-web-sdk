@@ -15,6 +15,7 @@
 #
 
 EventEmitter = require 'eventemitter3'
+PlatformLoader = require '../../platform/PlatformLoader'
 
 SEARCH_INTERVAL = 5 * 1000
 
@@ -33,26 +34,25 @@ SSDP_HEADER = /^([^:]+):\s*(.*)$/
 
 SSDP_SEARCH_TARGET = 'urn:dial-multiscreen-org:service:dial:1'
 
-class FfoxSSDPResponder extends EventEmitter
+class SSDPResponder extends EventEmitter
 
-    constructor: (@pluginLoader, @options) ->
+    constructor: (@options) ->
         @socket = null
         @searchTimerId = null
         @started = false
 
     _init: ->
-        @socket = new UDPSocket
+        @socket = PlatformLoader.createUdpSocket
             loopback: true
             localPort: SSDP_PORT
         @socket.joinMulticastGroup SSDP_ADDRESS
 
-        @socket.onmessage = (event) =>
-            msg = String.fromCharCode.apply null, new Uint8Array(event.data)
-            @_onData(msg)
+        @socket.onPacketReceived = (packet) =>
+            @_onData packet
 
     start: ->
         if @started
-            throw 'FfosSSDPResponder already started'
+            throw 'SSDPResponder already started'
 
         @started = true
         @_init()
@@ -68,7 +68,7 @@ class FfoxSSDPResponder extends EventEmitter
 
     stop: ->
         if not @started
-            console.warn 'FfosSSDPResponder is not started'
+            console.warn 'SSDPResponder is not started'
             return
 
         @started = false
@@ -108,4 +108,4 @@ class FfoxSSDPResponder extends EventEmitter
             else if headers.nts is 'ssdp:byebye'
                 @emit 'serviceLost', headers.location
 
-module.exports = FfoxSSDPResponder
+module.exports = SSDPResponder

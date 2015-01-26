@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FlintDevice = require '../../sender/FlintDevice'
+FlintDevice = require '../FlintDevice'
 
 class SSDPDevice extends FlintDevice
 
@@ -26,6 +26,9 @@ class SSDPDevice extends FlintDevice
 
         if @urlBase.slice(-5) isnt ':9431'
             @urlBase += ':9431'
+
+        @host = @urlBase.replace 'http://', ''
+        @host = @host.replace ':9431', ''
 
         @friendlyName = deviceDesc.friendlyName
         # make the udn as the uniqueId of SSDP device

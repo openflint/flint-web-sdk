@@ -14,31 +14,34 @@
 # limitations under the License.
 #
 
-PlatformDummy = require './PlatformDummy'
-PlatformFfos = require './ffos/PlatformFfos'
 Platform = require '../common/Platform'
+ChromeUdpSocket = require './chrome_app/ChromeUdpSocket'
+FfosUdpSocket = require './ffos/FfosUdpSocket'
 
 class PlatformLoader
 
-    @platform = null
+    @createXMLHttpRequest: ->
+        platform = Platform.getPlatform()
+        try
+            switch platform.browser
+                when 'ffos'
+                    return new XMLHttpRequest(mozSystem: true)
+                else
+                    return new XMLHttpRequest()
+        catch e
+            console.error 'catch: ', e
 
-    @getPlatform: ->
-        if not PlatformLoader.platform
-            platform = Platform.getPlatform()
-            console.info 'Platform is : ', platform.browser
-            try
-                switch platform.browser
-                    when 'ffos'
-                        PlatformLoader.platform = new PlatformFfos()
-                    else
-                        PlatformLoader.platform = new PlatformDummy()
-            catch e
-                PlatformLoader.platform = null
-                console.error 'catch: ', e
-
-            if not PlatformLoader.platform
-                PlatformLoader.platform = new PlatformDummy()
-
-        return PlatformLoader.platform
+    @createUdpSocket: (options)->
+        platform = Platform.getPlatform()
+        try
+            switch platform.browser
+                when 'ffos'
+                    return new FfosUdpSocket(options)
+                when 'chrome_app'
+                    return new ChromeUdpSocket(options)
+                else
+                    return null
+        catch e
+            console.error 'catch: ', e
 
 module.exports = PlatformLoader

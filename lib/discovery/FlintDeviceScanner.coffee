@@ -16,8 +16,8 @@
 
 EventEmitter = require 'eventemitter3'
 FlintDevice = require './FlintDevice'
-SSDPManager = require '../discovery/ssdp/SSDPManager'
-MDNSManager = require '../discovery/mdns/MDNSManager'
+SSDPManager = require './ssdp/SSDPManager'
+MDNSManager = require './mdns/MDNSManager'
 
 class FlintDeviceScanner extends EventEmitter
 
@@ -62,7 +62,7 @@ class FlintDeviceScanner extends EventEmitter
 
     _removeDevice: (uniqueId) ->
         if @devices[uniqueId]
-            console.warn 'found device: ', @devices[uniqueId].getName()
+            console.warn 'gone device: ', @devices[uniqueId].getName()
             @emit 'devicegone', @devices[uniqueId]
             delete @devices[uniqueId]
 

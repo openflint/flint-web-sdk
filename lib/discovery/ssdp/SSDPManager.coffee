@@ -15,17 +15,17 @@
 #
 
 EventEmitter = require 'eventemitter3'
-PlatformLoader = require '../../platform/PlatformLoader'
+SSDPResponder = require './SSDPResponder'
 SSDPDevice = require './SSDPDevice'
+PlatformLoader = require '../../platform/PlatformLoader'
 
 class SSDPManager extends EventEmitter
 
     constructor: ->
         @devices = {}
 
-        options =
+        @ssdp = new SSDPResponder
             st: 'urn:dial-multiscreen-org:service:dial:1'
-        @ssdp = PlatformLoader.getPlatform().createSSDPResponder options
 
         # 'url' is the location of device description
         @ssdp.on 'serviceFound', (url) =>
@@ -51,7 +51,7 @@ class SSDPManager extends EventEmitter
         @ssdp.stop()
 
     _fetchDeviceDesc: (url) ->
-        xhr = PlatformLoader.getPlatform().createXMLHttpRequest()
+        xhr = PlatformLoader.createXMLHttpRequest()
         if not xhr
             throw '_fetchDeviceDesc: failed'
 
