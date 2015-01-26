@@ -39,4 +39,7 @@ class FfosUdpSocket extends EventEmitter
     send: (data, addr, port) ->
         @socket?.send data, addr, port
 
+    close: ->
+        @socket?.close()
+
 module.exports = FfosUdpSocket

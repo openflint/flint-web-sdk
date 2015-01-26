@@ -74,6 +74,7 @@ class SSDPResponder extends EventEmitter
         @started = false
         if @searchTimerId
             clearInterval @searchTimerId
+        @socket.close()
 
     _onData: (data) ->
         lines = data.toString().split '\r\n'

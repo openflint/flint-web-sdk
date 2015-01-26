@@ -629,8 +629,9 @@ SSDPResponder = (function(_super) {
     }
     this.started = false;
     if (this.searchTimerId) {
-      return clearInterval(this.searchTimerId);
+      clearInterval(this.searchTimerId);
     }
+    return this.socket.close();
   };
 
   SSDPResponder.prototype._onData = function(data) {
@@ -830,6 +831,16 @@ ChromeUdpSocket = (function(_super) {
     })(this));
   };
 
+  ChromeUdpSocket.prototype.close = function() {
+    if (this.socketId_) {
+      return chrome.sockets.udp.close(this.socketId_, (function(_this) {
+        return function() {
+          return console.log('socket closed! ', _this.socketId_);
+        };
+      })(this));
+    }
+  };
+
   return ChromeUdpSocket;
 
 })(EventEmitter);
@@ -876,6 +887,11 @@ FfosUdpSocket = (function(_super) {
   FfosUdpSocket.prototype.send = function(data, addr, port) {
     var _ref;
     return (_ref = this.socket) != null ? _ref.send(data, addr, port) : void 0;
+  };
+
+  FfosUdpSocket.prototype.close = function() {
+    var _ref;
+    return (_ref = this.socket) != null ? _ref.close() : void 0;
   };
 
   return FfosUdpSocket;

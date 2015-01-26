@@ -89,4 +89,9 @@ class ChromeUdpSocket extends EventEmitter
             else # success
                 console.log 'UdpSocket: send success, ', sendInfo.bytesSent
 
+    close: ->
+        if @socketId_
+            chrome.sockets.udp.close @socketId_, =>
+                console.log 'socket closed! ', @socketId_
+
 module.exports = ChromeUdpSocket
