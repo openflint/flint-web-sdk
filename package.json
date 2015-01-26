@@ -1,5 +1,5 @@
 {
-  "name": "screen-sharing-sample",
+  "name": "flint-web-sdk",
   "version": "0.1.0",
   "dependencies": {
     "js-base64": "2.1.5",
