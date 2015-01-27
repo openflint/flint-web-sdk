@@ -206,6 +206,17 @@ FlintDevice = (function(_super) {
     return null;
   };
 
+  FlintDevice.prototype.toJson = function() {
+    var json;
+    json = {
+      deviceName: this.friendlyName,
+      urlBase: this.urlBase,
+      host: this.host,
+      uniqueId: this.uniqueId
+    };
+    return json;
+  };
+
   FlintDevice.prototype.triggerTimer = function() {
     this._clearTimer();
     return this.timeoutId = setTimeout(((function(_this) {

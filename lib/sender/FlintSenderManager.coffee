@@ -23,6 +23,7 @@ FlintConstants = require '../common/FlintConstants'
 
 class FlintSenderManager extends EventEmitter
 
+    # todo: change parameters to options
     constructor: (@appId, @device, @useHeartbeat) ->
         if not @appId or not @device
             throw 'FlintSenderManager constructor error'

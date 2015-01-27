@@ -44,6 +44,14 @@ class FlintDevice extends EventEmitter
         # 'ssdp' or 'mdns'
         null
 
+    toJson: ->
+        json =
+            deviceName: @friendlyName
+            urlBase: @urlBase
+            host: @host
+            uniqueId: @uniqueId
+        return json
+
     triggerTimer: ->
 #        console.log @getName(), ' : trigger timer'
         @_clearTimer()
