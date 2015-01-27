@@ -23,14 +23,13 @@ FlintConstants = require '../common/FlintConstants'
 
 class FlintSenderManager extends EventEmitter
 
-    # todo: change parameters to options
     constructor: (@appId, @device, @useHeartbeat) ->
         if not @appId or not @device
             throw 'FlintSenderManager constructor error'
 
-        @urlBase = @device?.getUrlBase()
+        @urlBase = @device.urlBase
         @serviceUrl = @urlBase + '/apps/' + @appId
-        @host = @device?.getHost()
+        @host = @device.host
 
         if @useHeartbeat is undefined
             @useHeartbeat = true

@@ -23,7 +23,6 @@ Peer = require '../peerjs/peer'
 
 class FlintReceiverManager extends EventEmitter
 
-    # todo: change parameters to options
     constructor: (@appId) ->
         if not @appId
             throw 'illegal APP ID'
