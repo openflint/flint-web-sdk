@@ -23,16 +23,20 @@ FlintConstants = require '../common/FlintConstants'
 
 class FlintSenderManager extends EventEmitter
 
-    constructor: (@appId, @device, @useHeartbeat) ->
-        if not @appId or not @device
+    constructor: (@options) ->
+        if not @options
             throw 'FlintSenderManager constructor error'
 
-        @urlBase = @device.urlBase
-        @serviceUrl = @urlBase + '/apps/' + @appId
-        @host = @device.host
+        @appId = @options.appId
 
-        if @useHeartbeat is undefined
+        @urlBase = @options.urlBase
+        @serviceUrl = @urlBase + '/apps/' + @appId
+        @host = @options.host
+
+        if @options.useHeartbeat is undefined
             @useHeartbeat = true
+        else
+            @useHeartbeat = @options.useHeartbeat
 
         @appState = {}
         @additionalData = {}
@@ -41,7 +45,7 @@ class FlintSenderManager extends EventEmitter
         @heartbeatInterval = 3 * 1000
         @heartbeatTimerId = null
 
-        @defMessageChannel = null
+        @messageChannel = null
         @messageBusList = {}
 
     #
@@ -49,9 +53,8 @@ class FlintSenderManager extends EventEmitter
     #
     getAdditionalData: ->
         return @additionalData['customData']
+
     #
-    # listener:
-    # on 'appstate', (result, state, additionaldata)
     # callback:
     #     (result, state, additionaldata)
     #
@@ -60,7 +63,6 @@ class FlintSenderManager extends EventEmitter
             'Accept': 'application/xml; charset=utf8'
         @_getState @serviceUrl, headers, (result, state) =>
             callback? result, state, @additionalData
-            @emit 'appstate', result, state, @additionalData
 
     _getState: (url, headers, callback) ->
         @_request 'GET', url, headers, null, (statusCode, responseText) =>
@@ -74,6 +76,7 @@ class FlintSenderManager extends EventEmitter
         lines = state.split '\n'
         lines.splice 0, 1
         responseText = lines.join ''
+        # todo: different in IE
         parser = new DOMParser()
         doc = parser.parseFromString responseText, 'text/xml'
 
@@ -98,20 +101,10 @@ class FlintSenderManager extends EventEmitter
                 for i of items
                     if items[i].tagName and items[i].innerHTML
                         _tmpAdditionalData[items[i].tagName] = items[i].innerHTML
-                #                changed = false
                 for key, value of _tmpAdditionalData
                     if @additionalData[key] isnt value
-#                        changed = true
                         @emit key + 'available', value
-                #                if not changed
-                #                    _additionalData = @additionalData
-                #                    for key, value of _additionalData
-                #                        if _tmpAdditionalData[key] isnt value
-                #                            changed = true
-                #                            break
                 @additionalData = _tmpAdditionalData
-#                if changed
-#                    @emit 'additionaldatachanged', @additionalData
 
     #
     # listener:
@@ -135,10 +128,8 @@ class FlintSenderManager extends EventEmitter
         @_launch 'join', appInfo, callback
 
     _onLaunchResult: (type, result, token, callback) ->
-        if callback
-            callback type, result, token
-        else
-            @emit type, result, token
+        callback? type, result, token
+
         # if success
         if result
             # to get additionaldata before starting heartbeat
@@ -245,19 +236,12 @@ class FlintSenderManager extends EventEmitter
                     else # join failed, stop failed
                         @_onStop 'appstop', false, callback
 
-    #
-    # listener:
-    # on 'appdisconnect', result
-    #
     disconnect: (callback) ->
         @_stopHeartbeat()
         @_stop 'disconnect', @serviceUrl, callback
 
     _onStop: (type, result, callback) ->
-        if callback
-            callback? type, result
-        else
-            @emit type, result
+        callback? type, result
 
     _stop: (stopType, url, callback) ->
         if not @token
@@ -294,16 +278,16 @@ class FlintSenderManager extends EventEmitter
             xhr.send ''
 
     _createMessageChannel: ->
-        if not @defMessageChannel
-            @defMessageChannel = new SenderMessageChannel FlintConstants.DEFAULT_CHANNEL_NAME
-            @defMessageChannel.on 'open', () =>
+        if not @messageChannel
+            @messageChannel = new SenderMessageChannel FlintConstants.DEFAULT_CHANNEL_NAME
+            @messageChannel.on 'open', () =>
                 console.log 'sender message channel open!!!'
-            @defMessageChannel.on 'close', () =>
+            @messageChannel.on 'close', () =>
                 console.log 'sender message channel close!!!'
-            @defMessageChannel.on 'error', () =>
+            @messageChannel.on 'error', () =>
                 console.log 'sender message channel error!!!'
-            @_openMessageChannel @defMessageChannel
-        return @defMessageChannel
+            @_openMessageChannel @messageChannel
+        return @messageChannel
 
     _openMessageChannel: (channel) ->
         @.once channel.getName() + 'available', (channelUrl) =>
@@ -315,8 +299,8 @@ class FlintSenderManager extends EventEmitter
     createMessageBus: (namespace) ->
         if not namespace
             namespace = FlintConstants.DEFAULT_NAMESPACE
-        if not @defMessageChannel
-            @defMessageChannel = @_createMessageChannel()
+        if not @messageChannel
+            @messageChannel = @_createMessageChannel()
         messageBus = @_createMessageBus namespace
         return messageBus
 
@@ -325,11 +309,11 @@ class FlintSenderManager extends EventEmitter
         if @messageBusList[namespace]
             messageBus = @messageBusList[namespace]
         else
-            messageBus = new SenderMessageBus @defMessageChannel, namespace
+            messageBus = new SenderMessageBus @messageChannel, namespace
             @messageBusList[namespace] = messageBus
         return messageBus
 
-    createPeer: ->
+    _createPeer: ->
         peer = new Peer
             host: @host
             port: '9433'
@@ -361,8 +345,8 @@ class FlintSenderManager extends EventEmitter
         return peer
 
     _clean: ->
-        @defMessageChannel?.close()
-        @defMessageChannel = null
+        @messageChannel?.close()
+        @messageChannel = null
         @messageBusList = null
 
 module.exports = FlintSenderManager
