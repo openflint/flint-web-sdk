@@ -236,6 +236,7 @@ class FlintSenderManager extends EventEmitter
             else # unavailable @token, need join
                 console.warn 'stop failed, try join!'
                 @join appInfo, (_type, _result, _token)=>
+                    @_stopHeartbeat()
                     if _result # join success, continue stopping
                         console.log 'join ok, use token = ', _token, ' to stop!'
                         @token = _token

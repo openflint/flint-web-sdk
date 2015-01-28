@@ -2299,6 +2299,7 @@ FlintSenderManager = (function(_super) {
         } else {
           console.warn('stop failed, try join!');
           return _this.join(appInfo, function(_type, _result, _token) {
+            _this._stopHeartbeat();
             if (_result) {
               console.log('join ok, use token = ', _token, ' to stop!');
               _this.token = _token;
