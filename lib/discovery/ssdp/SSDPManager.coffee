@@ -17,14 +17,13 @@
 EventEmitter = require 'eventemitter3'
 SSDPResponder = require './SSDPResponder'
 SSDPDevice = require './SSDPDevice'
-XhrGenerator = require '../../xhr/XhrGenerator'
 
 class SSDPManager extends EventEmitter
 
     constructor: ->
         @devices = {}
 
-        @ssdp = new SSDPResponder
+        @ssdp = @_createSSDPResponder
             st: 'urn:dial-multiscreen-org:service:dial:1'
 
         # 'url' is the location of device description
@@ -44,6 +43,9 @@ class SSDPManager extends EventEmitter
                 device.clear()
                 delete @devices[url]
 
+    _createSSDPResponder: (options)->
+        throw 'Not Implement'
+
     start: ->
         @ssdp.start()
 
@@ -51,7 +53,7 @@ class SSDPManager extends EventEmitter
         @ssdp.stop()
 
     _fetchDeviceDesc: (url) ->
-        xhr = XhrGenerator.createXMLHttpRequest()
+        xhr = @_createXhr()
         if not xhr
             throw '_fetchDeviceDesc: failed'
 
@@ -61,6 +63,9 @@ class SSDPManager extends EventEmitter
 #                console.log 'SSDPManager received:\n', xhr.responseText
                 @_parseDeviceDesc xhr.responseText, url
         xhr.send ''
+
+    _createXhr: ->
+        throw 'Not Implement'
 
     _parseDeviceDesc: (data, url) ->
         try

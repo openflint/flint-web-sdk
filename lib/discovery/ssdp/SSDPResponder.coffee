@@ -15,7 +15,6 @@
 #
 
 EventEmitter = require 'eventemitter3'
-SocketGenerator = require '../../socket/SocketGenerator'
 
 SEARCH_INTERVAL = 5 * 1000
 
@@ -42,13 +41,16 @@ class SSDPResponder extends EventEmitter
         @started = false
 
     _init: ->
-        @socket = SocketGenerator.createUdpSocket
-            loopback: true
+        @socket = @_createUdpSocket
+            loopback: false
             localPort: SSDP_PORT
         @socket.joinMulticastGroup SSDP_ADDRESS
 
-        @socket.onPacketReceived = (packet) =>
+        @socket.onPacket = (packet) =>
             @_onData packet
+
+    _createUdpSocket: (options) ->
+        throw 'Not Implement'
 
     start: ->
         if @started

@@ -14,15 +14,14 @@
 # limitations under the License.
 #
 
-FlintDevice = require '../FlintDevice'
+SSDPResponder = require '../ssdp/SSDPResponder'
 
-class MDNSDevice extends FlintDevice
+class SSDPResponderFirefox extends SSDPResponder
 
-    constructor: ->
-        null
+    constructor: (@options) ->
+        super options
 
-    getDeviceType: ->
-        return 'mdns'
+    _createUdpSocket: (options) ->
+        return new UdpSocketFirefox(options)
 
-
-module.exports = MDNSDevice
+module.exports = SSDPResponderFirefox

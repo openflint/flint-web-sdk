@@ -16,8 +16,6 @@
 
 EventEmitter = require 'eventemitter3'
 FlintDevice = require './FlintDevice'
-SSDPManager = require './ssdp/SSDPManager'
-MDNSManager = require './mdns/MDNSManager'
 
 class FlintDeviceScanner extends EventEmitter
 
@@ -25,30 +23,22 @@ class FlintDeviceScanner extends EventEmitter
 
     constructor: ->
         @devices = {}
-
         @ssdpManager = null
-        @mdnsManager = null
 
         @_init()
 
     _init: ->
         @_initSSDP()
-        @_initmDns()
+
+    _createSSDP: ->
+        throw 'Not Implement'
 
     _initSSDP: ->
         console.info 'init SSDPManager'
-        @ssdpManager = new SSDPManager()
+        @ssdpManager = @_createSSDP()
         @ssdpManager.on 'adddevice', (device) =>
             @_addDevice device
         @ssdpManager.on 'removedevice', (uniqueId) =>
-            @_removeDevice uniqueId
-
-    _initmDns: ->
-        console.info 'init MDNSManager'
-        @mdnsManager = new MDNSManager()
-        @mdnsManager.on 'adddevice', (device) =>
-            @_addDevice device
-        @mdnsManager.on 'removedevice', (uniqueId) =>
             @_removeDevice uniqueId
 
     _addDevice: (device) ->
@@ -68,11 +58,9 @@ class FlintDeviceScanner extends EventEmitter
 
     start: ->
         @ssdpManager?.start()
-        @mdnsManager?.start()
 
     stop: ->
         @ssdpManager?.stop()
-        @mdnsManager?.stop()
 
     getDeviceList: ->
         dList = []

@@ -14,20 +14,15 @@
 # limitations under the License.
 #
 
-EventEmitter = require 'eventemitter3'
+SSDPResponder = require '../ssdp/SSDPResponder'
+UdpSocketChrome = require './UdpSocketChrome'
 
-#
-# TODO: not implemented
-#
-class MDNSManager extends EventEmitter
+class SSDPResponderChrome extends SSDPResponder
 
-    constructor: ->
-        null
+    constructor: (@options) ->
+        super options
 
-    start: ->
-        null
+    _createUdpSocket: (options) ->
+        return new UdpSocketChrome(options)
 
-    stop: ->
-        null
-
-module.exports = MDNSManager
+module.exports = SSDPResponderChrome

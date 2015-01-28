@@ -14,23 +14,17 @@
 # limitations under the License.
 #
 
-Platform = require '../common/Platform'
-ChromeUdpSocket = require './chrome_app/ChromeUdpSocket'
-FfosUdpSocket = require './ffos/FfosUdpSocket'
+FlintDeviceScanner = require '../FlintDeviceScanner'
+SSDPManagerFfos = require './SSDPManagerFfos'
 
-class SocketGenerator
+class FlintDeviceScannerFfos extends FlintDeviceScanner
 
-    @createUdpSocket: (options)->
-        platform = Platform.getPlatform()
-        try
-            switch platform.browser
-                when 'ffos'
-                    return new FfosUdpSocket(options)
-                when 'chrome_app'
-                    return new ChromeUdpSocket(options)
-                else
-                    return null
-        catch e
-            console.error 'catch: ', e
+    INTERVAL = 10 * 1000
 
-module.exports = SocketGenerator
+    constructor: ->
+        super
+
+    _createSSDP: ->
+        return new SSDPManagerFfos()
+
+module.exports = FlintDeviceScannerFfos

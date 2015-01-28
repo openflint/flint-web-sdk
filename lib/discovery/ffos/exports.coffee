@@ -1,0 +1,1 @@
+window.FlintDeviceScanner = require './FlintDeviceScannerFfos'

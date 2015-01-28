@@ -14,19 +14,18 @@
 # limitations under the License.
 #
 
-Platform = require '../common/Platform'
+SSDPManager = require '../ssdp/SSDPManager'
+SSDPResponderChrome = require './SSDPResponderChrome'
 
-class XhrGenerator
+class SSDPManagerChrome extends SSDPManager
 
-    @createXMLHttpRequest: ->
-        platform = Platform.getPlatform()
-        try
-            switch platform.browser
-                when 'ffos'
-                    return new XMLHttpRequest(mozSystem: true)
-                else
-                    return new XMLHttpRequest()
-        catch e
-            console.error 'catch: ', e
+    constructor: ->
+        super
 
-module.exports = XhrGenerator
+    _createSSDPResponder: (options)->
+        return new SSDPResponderChrome(options)
+
+    _createXhr: ->
+        return new XMLHttpRequest()
+
+module.exports = SSDPManagerChrome

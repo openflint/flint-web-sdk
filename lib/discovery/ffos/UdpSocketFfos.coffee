@@ -14,9 +14,7 @@
 # limitations under the License.
 #
 
-EventEmitter = require 'eventemitter3'
-
-class FfosUdpSocket extends EventEmitter
+class UdpSocketFfos
 
     constructor: (@options) ->
         @localPort_ = options.localPort
@@ -26,20 +24,20 @@ class FfosUdpSocket extends EventEmitter
 
         @socket.onmessage = (event) =>
             data = String.fromCharCode.apply null, new Uint8Array(event.data)
-            _onMessage data
+            @_onMessage data
 
     _onMessage: (data)->
 #        console.log 'received packet:\n', data
-        if @onPacketReceived
-            @onPacketReceived data
+        if @onPacket
+            @onPacket data
 
     joinMulticastGroup: (addr) ->
-        @socket?.joinMulticastGroup addr
+        @socket.joinMulticastGroup addr
 
     send: (data, addr, port) ->
-        @socket?.send data, addr, port
+        @socket.send data, addr, port
 
     close: ->
-        @socket?.close()
+        @socket.close()
 
-module.exports = FfosUdpSocket
+module.exports = UdpSocketFfos

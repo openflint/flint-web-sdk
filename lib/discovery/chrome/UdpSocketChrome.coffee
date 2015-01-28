@@ -16,7 +16,7 @@
 
 EventEmitter = require 'eventemitter3'
 
-class ChromeUdpSocket extends EventEmitter
+class UdpSocketChrome extends EventEmitter
 
     @ab2str: (buf) =>
         return String.fromCharCode.apply null, new Uint8Array(buf)
@@ -37,52 +37,69 @@ class ChromeUdpSocket extends EventEmitter
         @_init()
 
     _init: ->
-        info =
+        udpInfo =
             'persistent': false,
-            'name': 'udpSocket',
+            'name': 'Flint',
             'bufferSize': 4096
-        chrome.sockets.udp.create {}, (createInfo) =>
+        chrome.sockets.udp.create udpInfo, (createInfo) =>
             @socketId_ = createInfo.socketId
             console.log 'create UdpSocket: ', @socketId_
+
+            chrome.sockets.udp.setMulticastLoopbackMode @socketId_, @loopback_, (result) =>
+                console.log 'setMulticastLoopbackMode UdpSocket: loopback=', @loopback_, ', result=', result
+
             chrome.sockets.udp.bind @socketId_, '0.0.0.0', @localPort_, (result) =>
                 console.log 'bind UdpSocket: port=', @localPort_, ', result=', result
+                @emit 'bind'
 
-                # set packet listener
-                chrome.sockets.udp.onReceive.addListener (info)=>
-                    if @socketId_ is info.socketId
-                        @_onMessage ChromeUdpSocket.ab2str(info.data)
+            # set packet listener
+            chrome.sockets.udp.onReceive.addListener (info)=>
+                if @socketId_ is info.socketId
+                    @_onMessage UdpSocketChrome.ab2str(info.data)
+            # set error listener
+            chrome.sockets.udp.onReceive.addListener (info)=>
+                if @socketId_ is info.socketId
+                    @_onError 'error'
 
-                # set error listener
-                chrome.sockets.udp.onReceive.addListener (info)=>
-                    if @socketId_ is info.socketId
-                        @_onError 'error'
-
-                @emit 'ready'
+            @emit 'create'
 
     _onMessage: (data)->
 #        console.log 'received packet:\n', data
-        if @onPacketReceived
-            @onPacketReceived data
+        if @onPacket
+            @onPacket data
 
     _onError: (error) ->
-        if @onerror
-            @onerror error
+        if @onError
+            @onError error
 
+#    bind: (port)->
+#        if @socketId_ is -1
+#            @.once 'create', =>
+#                @_bind port
+#        else
+#            @_bind port
+
+#    _bind: (port) ->
+#        chrome.sockets.udp.bind @socketId_, '0.0.0.0', port, (result) =>
+#            console.log 'bind UdpSocket: port=', port, ', result=', result
+#            @emit 'bind'
 
     joinMulticastGroup: (addr) ->
         if @socketId_ is -1
-            @.once 'ready', =>
-                chrome.sockets.udp.joinGroup @socketId_, addr, (result)=>
-                    console.log 'joinGroup UdpSocket: addr=', addr, ', result=', result
+            @.once 'create', =>
+                @_joinMulticastGroup addr
         else
-            chrome.sockets.udp.joinGroup @socketId_, addr, (result)=>
-                console.log 'joinGroup UdpSocket: addr=', addr, ', result=', result
+            @_joinMulticastGroup addr
+
+    _joinMulticastGroup: (addr) ->
+        chrome.sockets.udp.joinGroup @socketId_, addr, (result)=>
+            console.log 'joinGroup UdpSocket: addr=', addr, ', result=', result
 
     send: (data, addr, port) ->
-        if not @socketId_
+        if @socketId_ is -1
             return
 
-        _data = ChromeUdpSocket.str2ab data
+        _data = UdpSocketChrome.str2ab data
         chrome.sockets.udp.send @socketId_, _data, addr, port, (sendInfo) =>
             if sendInfo.resultCode < 0 # fail
                 console.error 'UdpSocket: send error!!!'
@@ -94,4 +111,4 @@ class ChromeUdpSocket extends EventEmitter
             chrome.sockets.udp.close @socketId_, =>
                 console.log 'socket closed! ', @socketId_
 
-module.exports = ChromeUdpSocket
+module.exports = UdpSocketChrome

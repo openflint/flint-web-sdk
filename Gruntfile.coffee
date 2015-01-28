@@ -23,7 +23,9 @@ module.exports = (grunt) ->
                         extensions: ['.coffee']
             discovery:
                 files:
-                    'out/flint_discovery.js': ['lib/discovery/exports.coffee']
+                    'out/discovery/chrome/flint_discovery.js': ['lib/discovery/chrome/exports.coffee']
+                    'out/discovery/firefox/flint_discovery.js': ['lib/discovery/firefox/exports.coffee']
+                    'out/discovery/ffos/flint_discovery.js': ['lib/discovery/ffos/exports.coffee']
                 options:
                     transform: ['coffeeify']
                     browserifyOptions:
@@ -46,10 +48,18 @@ module.exports = (grunt) ->
                 options: { mangle: true, compress: true }
                 src: 'out/flint_receiver_sdk.js'
                 dest: 'out/flint_receiver_sdk.min.js'
-            discovery:
+            discovery_chrome:
                 options: { mangle: true, compress: true }
-                src: 'out/flint_discovery.js'
-                dest: 'out/flint_discovery.min.js'
+                src: 'out/discovery/chrome/flint_discovery.js'
+                dest: 'out/discovery/chrome/flint_discovery.min.js'
+            discovery_firefox:
+                options: { mangle: true, compress: true }
+                src: 'out/discovery/firefox/flint_discovery.js'
+                dest: 'out/discovery/firefox/flint_discovery.min.js'
+            discovery_ffos:
+                options: { mangle: true, compress: true }
+                src: 'out/discovery/ffos/flint_discovery.js'
+                dest: 'out/discovery/ffos/flint_discovery.min.js'
 
         concat:
             sender_chrome:
@@ -104,18 +114,43 @@ module.exports = (grunt) ->
                 src: 'out/flint_receiver_sdk.min.js'
                 dest: 'out/flint_receiver_sdk.min.js'
 
-            discovery:
+            discovery_chrome:
                 options:
                     banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
                         'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/flint_discovery.js'
-                dest: 'out/flint_discovery.js'
-            discovery_prod:
+                src: 'out/discovery/chrome/flint_discovery.js'
+                dest: 'out/discovery/chrome/flint_discovery.js'
+            discovery_prod_chrome:
                 options:
                     banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
                         'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/flint_discovery.min.js'
-                dest: 'out/flint_discovery.min.js'
+                src: 'out/discovery/chrome/flint_discovery.min.js'
+                dest: 'out/discovery/chrome/flint_discovery.min.js'
+            discovery_firefox:
+                options:
+                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
+                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
+                src: 'out/discovery/firefox/flint_discovery.js'
+                dest: 'out/discovery/firefox/flint_discovery.js'
+            discovery_prod_firefox:
+                options:
+                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
+                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
+                src: 'out/discovery/firefox/flint_discovery.min.js'
+                dest: 'out/discovery/firefox/flint_discovery.min.js'
+            discovery_ffos:
+                options:
+                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
+                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
+                src: 'out/discovery/ffos/flint_discovery.js'
+                dest: 'out/discovery/ffos/flint_discovery.js'
+            discovery_prod_ffos:
+                options:
+                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
+                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
+                src: 'out/discovery/ffos/flint_discovery.min.js'
+                dest: 'out/discovery/ffos/flint_discovery.min.js'
+
 
     # Load the plugin that provides the "coffee" task.
 
