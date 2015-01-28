@@ -14,20 +14,19 @@
 # limitations under the License.
 #
 
-EventEmitter = require 'eventemitter3'
-ReceiverMessageChannel = require './ReceiverMessageChannel'
 MessageChannel = require '../common/MessageChannel'
+ReceiverMessageChannel = require './ReceiverMessageChannel'
 ReceiverMessageBus = require './ReceiverMessageBus'
 FlintConstants = require '../common/FlintConstants'
 Peer = require '../peerjs/peer'
 
-class FlintReceiverManager extends EventEmitter
+class FlintReceiverManager
 
     constructor: (@appId) ->
         if not @appId
             throw 'illegal APP ID'
         else
-            console.info 'FlintReceiverManager appid = ', @appId
+            console.log 'FlintReceiverManager appid = ', @appId
 
         @ipcChannel = null
         @ipcAddress = "ws://127.0.0.1:9431/receiver/" + @appId
@@ -42,7 +41,7 @@ class FlintReceiverManager extends EventEmitter
         @cusAdditionalData = null
 
     open: ->
-        if @_isStarted()
+        if @_isOpened()
             console.warn 'FlintReceiverManager is already opened'
             return
 
@@ -51,17 +50,14 @@ class FlintReceiverManager extends EventEmitter
             console.log 'ipcChannel opened!!!'
             @_ipcSend
                 type: 'register'
-            @emit 'open', event
 
         @ipcChannel.on 'close', (event) =>
             console.log 'ipcChannel closed!!!'
             @ipcChannel = null
-            @emit 'close', event
 
         @ipcChannel.on 'error', (event) =>
             console.error 'ipcChannel error!!!'
             @ipcChannel = null
-            @emit 'error', event
 
         @ipcChannel.on 'message', (data) =>
             try
@@ -98,10 +94,8 @@ class FlintReceiverManager extends EventEmitter
                 else
                     console.error 'unknow heartbeat message!!!'
             when 'senderconnected'
-                @emit 'senderconnected', data.token
                 console.info 'IPC senderconnected: ', data.token
             when 'senderdisconnected'
-                @emit 'senderdisconnected', data.token
                 console.info 'IPC senderdisconnected: ', data.token
             else
                 console.error 'IPC unknow type: ', data.type
@@ -138,7 +132,7 @@ class FlintReceiverManager extends EventEmitter
             return null
 
     close: ->
-        if @_isStarted()
+        if @_isOpened()
             @_ipcSend
                 type: 'unregister'
             @messageChannel?.close()
@@ -160,15 +154,15 @@ class FlintReceiverManager extends EventEmitter
             console.log 'Receiver default message channel open!!! ', event
         return channel
 
-    #
-    # for android/iOS senders, don't suggest to use this API if the sender is a web app
-    #
     createMessageBus: (namespace) ->
+        if @_isOpened()
+            throw 'cannot create MessageBus: FlintReceiverManager is already opened'
+            return
+
         if not namespace
             namespace = FlintConstants.DEFAULT_NAMESPACE
         if not @messageChannel
             @messageChannel = @_createMessageChannel FlintConstants.DEFAULT_CHANNEL_NAME
-#            throw 'createMessageBus failed: default MessageChannel is null'
         messageBus = @_createMessageBus namespace
         return messageBus
 
@@ -210,7 +204,7 @@ class FlintReceiverManager extends EventEmitter
             @_sendAdditionalData()
         return peer
 
-    _isStarted: ->
+    _isOpened: ->
         return @ipcChannel && ipcChannel.isOpened()
 
     _ipcSend: (message) ->

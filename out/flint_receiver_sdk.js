@@ -1870,15 +1870,11 @@ var util = {
 module.exports = util;
 
 },{"./adapter":4,"js-binarypack":16}],11:[function(require,module,exports){
-var EventEmitter, FlintConstants, FlintReceiverManager, MessageChannel, Peer, ReceiverMessageBus, ReceiverMessageChannel,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-EventEmitter = require('eventemitter3');
-
-ReceiverMessageChannel = require('./ReceiverMessageChannel');
+var FlintConstants, FlintReceiverManager, MessageChannel, Peer, ReceiverMessageBus, ReceiverMessageChannel;
 
 MessageChannel = require('../common/MessageChannel');
+
+ReceiverMessageChannel = require('./ReceiverMessageChannel');
 
 ReceiverMessageBus = require('./ReceiverMessageBus');
 
@@ -1886,15 +1882,13 @@ FlintConstants = require('../common/FlintConstants');
 
 Peer = require('../peerjs/peer');
 
-FlintReceiverManager = (function(_super) {
-  __extends(FlintReceiverManager, _super);
-
+FlintReceiverManager = (function() {
   function FlintReceiverManager(appId) {
     this.appId = appId;
     if (!this.appId) {
       throw 'illegal APP ID';
     } else {
-      console.info('FlintReceiverManager appid = ', this.appId);
+      console.log('FlintReceiverManager appid = ', this.appId);
     }
     this.ipcChannel = null;
     this.ipcAddress = "ws://127.0.0.1:9431/receiver/" + this.appId;
@@ -1908,7 +1902,7 @@ FlintReceiverManager = (function(_super) {
 
   FlintReceiverManager.prototype.open = function() {
     var _ref;
-    if (this._isStarted()) {
+    if (this._isOpened()) {
       console.warn('FlintReceiverManager is already opened');
       return;
     }
@@ -1916,24 +1910,21 @@ FlintReceiverManager = (function(_super) {
     this.ipcChannel.on('open', (function(_this) {
       return function(event) {
         console.log('ipcChannel opened!!!');
-        _this._ipcSend({
+        return _this._ipcSend({
           type: 'register'
         });
-        return _this.emit('open', event);
       };
     })(this));
     this.ipcChannel.on('close', (function(_this) {
       return function(event) {
         console.log('ipcChannel closed!!!');
-        _this.ipcChannel = null;
-        return _this.emit('close', event);
+        return _this.ipcChannel = null;
       };
     })(this));
     this.ipcChannel.on('error', (function(_this) {
       return function(event) {
         console.error('ipcChannel error!!!');
-        _this.ipcChannel = null;
-        return _this.emit('error', event);
+        return _this.ipcChannel = null;
       };
     })(this));
     this.ipcChannel.on('message', (function(_this) {
@@ -1977,10 +1968,8 @@ FlintReceiverManager = (function(_super) {
         }
         break;
       case 'senderconnected':
-        this.emit('senderconnected', data.token);
         return console.info('IPC senderconnected: ', data.token);
       case 'senderdisconnected':
-        this.emit('senderdisconnected', data.token);
         return console.info('IPC senderdisconnected: ', data.token);
       default:
         return console.error('IPC unknow type: ', data.type);
@@ -2030,7 +2019,7 @@ FlintReceiverManager = (function(_super) {
 
   FlintReceiverManager.prototype.close = function() {
     var _ref, _ref1;
-    if (this._isStarted()) {
+    if (this._isOpened()) {
       this._ipcSend({
         type: 'unregister'
       });
@@ -2072,6 +2061,10 @@ FlintReceiverManager = (function(_super) {
 
   FlintReceiverManager.prototype.createMessageBus = function(namespace) {
     var messageBus;
+    if (this._isOpened()) {
+      throw 'cannot create MessageBus: FlintReceiverManager is already opened';
+      return;
+    }
     if (!namespace) {
       namespace = FlintConstants.DEFAULT_NAMESPACE;
     }
@@ -2138,7 +2131,7 @@ FlintReceiverManager = (function(_super) {
     return peer;
   };
 
-  FlintReceiverManager.prototype._isStarted = function() {
+  FlintReceiverManager.prototype._isOpened = function() {
     return this.ipcChannel && ipcChannel.isOpened();
   };
 
@@ -2151,13 +2144,13 @@ FlintReceiverManager = (function(_super) {
 
   return FlintReceiverManager;
 
-})(EventEmitter);
+})();
 
 module.exports = FlintReceiverManager;
 
 
 
-},{"../common/FlintConstants":1,"../common/MessageChannel":3,"../peerjs/peer":8,"./ReceiverMessageBus":12,"./ReceiverMessageChannel":13,"eventemitter3":15}],12:[function(require,module,exports){
+},{"../common/FlintConstants":1,"../common/MessageChannel":3,"../peerjs/peer":8,"./ReceiverMessageBus":12,"./ReceiverMessageChannel":13}],12:[function(require,module,exports){
 var MessageBus, ReceiverMessageBus,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
