@@ -18,7 +18,6 @@ EventEmitter = require 'eventemitter3'
 SenderMessageChannel = require './SenderMessageChannel'
 SenderMessageBus = require './SenderMessageBus'
 Peer = require '../peerjs/peer'
-XhrGenerator = require '../xhr/XhrGenerator'
 FlintConstants = require '../common/FlintConstants'
 
 class FlintSenderManager extends EventEmitter
@@ -258,7 +257,7 @@ class FlintSenderManager extends EventEmitter
     # callback = => (statusCode, responseText)
     _request: (method, url, headers, data, callback) ->
         console.log 'request: method -> ', method, ', url -> ', url, ', headers -> ', headers
-        xhr = XhrGenerator.createXMLHttpRequest()
+        xhr = @_createXhr()
         if not xhr
             throw 'request: failed'
 
@@ -276,6 +275,12 @@ class FlintSenderManager extends EventEmitter
             xhr.send JSON.stringify(data)
         else
             xhr.send ''
+
+    #
+    # sub-class need to implement
+    #
+    _createXhr: ->
+        throw 'Not Implement'
 
     _createMessageChannel: ->
         if not @messageChannel

@@ -1,0 +1,1 @@
+window.FlintSenderManager = require './FlintSenderManagerFfos'
