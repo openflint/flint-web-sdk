@@ -181,7 +181,7 @@ class FlintReceiverManager extends EventEmitter
             @messageBusList[namespace] = messageBus
         return messageBus
 
-    createPeer: ->
+    _createPeer: ->
         peer = new Peer
             host: '127.0.0.1'
             port: '9433'

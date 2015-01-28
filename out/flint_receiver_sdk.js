@@ -2094,7 +2094,7 @@ FlintReceiverManager = (function(_super) {
     return messageBus;
   };
 
-  FlintReceiverManager.prototype.createPeer = function() {
+  FlintReceiverManager.prototype._createPeer = function() {
     var peer;
     peer = new Peer({
       host: '127.0.0.1',
