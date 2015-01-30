@@ -53,20 +53,24 @@ class UdpSocketChrome extends EventEmitter
                 @emit 'bind'
 
             # set packet listener
-            chrome.sockets.udp.onReceive.addListener (info)=>
-                if @socketId_ is info.socketId
-                    @_onMessage UdpSocketChrome.ab2str(info.data)
+            chrome.sockets.udp.onReceive.addListener @_onReceiveListener
             # set error listener
-            chrome.sockets.udp.onReceive.addListener (info)=>
-                if @socketId_ is info.socketId
-                    @_onError 'error'
+            chrome.sockets.udp.onReceiveError.addListener @_onReceiveErrorListener
 
             @emit 'create'
+
+    _onReceiveListener: (info)=>
+        if @socketId_ is info.socketId
+            @_onMessage UdpSocketChrome.ab2str(info.data)
 
     _onMessage: (data)->
 #        console.log 'received packet:\n', data
         if @onPacket
             @onPacket data
+
+    _onReceiveErrorListener: (info)=>
+        if @socketId_ is info.socketId
+            @_onError 'error'
 
     _onError: (error) ->
         if @onError
@@ -109,6 +113,8 @@ class UdpSocketChrome extends EventEmitter
     close: ->
         if @socketId_
             chrome.sockets.udp.close @socketId_, =>
+                chrome.sockets.udp.onReceive.removeListener @_onReceiveListener
+                chrome.sockets.udp.onReceiveError.removeListener @_onReceiveErrorListener
                 console.log 'socket closed! ', @socketId_
 
 module.exports = UdpSocketChrome
