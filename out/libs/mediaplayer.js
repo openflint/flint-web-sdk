@@ -30,6 +30,8 @@ var MediaPlayer = function (manager, videoId) {
     self.requestIdSeek = 0;
     self.requestIdGetStatus = 0;
 
+    self.requestIdStop = 0; // STOP
+
     self.receiverManager = manager;
     var messageBus = self.receiverManager.createMessageBus("urn:flint:org.openflint.fling.media");
 
@@ -216,6 +218,16 @@ var MediaPlayer = function (manager, videoId) {
         }
     };
 
+    self.stop = function(customData) {
+        console.info("STOP command received!");
+        syncExecute(function () {
+            video.pause();
+            video.currentTime = 0;
+        });
+        ("onstop" in self) && self.onstop(customData);
+        messageReport.idle("CANCELLED");
+    }
+
     var _senderId = "*:*";
 
     messageBus.on("senderConnected", function (senderId) {
@@ -266,6 +278,15 @@ var MediaPlayer = function (manager, videoId) {
                 case "GET_STATUS":
                     (self.requestId) && (self.requestIdGetStatus = self.requestId);
                     messageReport.syncPlayerState();
+                    break;
+
+                case "STOP":
+                    (self.requestId) && (self.requestIdStop = self.requestId);
+                    var customData = null;
+                    if ("customData" in messageData) { // data related with STOP
+                        customData = messageData.customData;
+                    }
+                    self.stop(customData);
                     break;
             }
 
