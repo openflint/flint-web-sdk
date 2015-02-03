@@ -1,29 +1,5 @@
 # Sender SDK
 
-## device discovery
-
-```
-var deviceScanner = new FlintDeviceScanner();
-// scan new deivces
-deviceScanner.on('devicefound', function(device) {
-    // get device's name
-    var name = device.getName();
-    // get Flint Service Url
-    var url = device.getUrlBase();
-    // get unique device ID
-    var uniqueId = device.getUniqueId();
-});
-// device lost
-deviceScanner.on('devicegone', function(device) {
-});
-// start scanning
-deviceScanner.start();
-// stop scanning
-deviceScanner.stop();
-// get device list
-deviceScanner.getDeviceList();
-```
-
 ## use FlintSenderManager
 
 ```

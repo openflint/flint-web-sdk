@@ -14,17 +14,14 @@
 # limitations under the License.
 #
 
-FlintDeviceScanner = require '../FlintDeviceScanner'
-SSDPManagerFfos = require './SSDPManagerFfos'
+FlintSenderManager = require '../FlintSenderManager'
 
-class FlintDeviceScannerFfos extends FlintDeviceScanner
+class FlintSenderManagerCommon extends FlintSenderManager
 
-    INTERVAL = 10 * 1000
+    constructor: (@options) ->
+        super options
 
-    constructor: ->
-        super
+    _createXhr: ->
+        return new XMLHttpRequest()
 
-    _createSSDP: ->
-        return new SSDPManagerFfos()
-
-module.exports = FlintDeviceScannerFfos
+module.exports = FlintSenderManagerCommon

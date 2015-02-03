@@ -2396,38 +2396,38 @@ module.exports = SenderMessageChannel;
 
 
 },{"../common/MessageChannel":3}],14:[function(require,module,exports){
-var FlintSenderManager, FlintSenderManagerChrome,
+var FlintSenderManager, FlintSenderManagerCommon,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 FlintSenderManager = require('../FlintSenderManager');
 
-FlintSenderManagerChrome = (function(_super) {
-  __extends(FlintSenderManagerChrome, _super);
+FlintSenderManagerCommon = (function(_super) {
+  __extends(FlintSenderManagerCommon, _super);
 
-  function FlintSenderManagerChrome(options) {
+  function FlintSenderManagerCommon(options) {
     this.options = options;
-    FlintSenderManagerChrome.__super__.constructor.call(this, options);
+    FlintSenderManagerCommon.__super__.constructor.call(this, options);
   }
 
-  FlintSenderManagerChrome.prototype._createXhr = function() {
+  FlintSenderManagerCommon.prototype._createXhr = function() {
     return new XMLHttpRequest();
   };
 
-  return FlintSenderManagerChrome;
+  return FlintSenderManagerCommon;
 
 })(FlintSenderManager);
 
-module.exports = FlintSenderManagerChrome;
+module.exports = FlintSenderManagerCommon;
 
 
 
 },{"../FlintSenderManager":11}],15:[function(require,module,exports){
-window.FlintSenderManager = require('./FlintSenderManagerChrome');
+window.FlintSenderManager = require('./FlintSenderManagerCommon');
 
 
 
-},{"./FlintSenderManagerChrome":14}],16:[function(require,module,exports){
+},{"./FlintSenderManagerCommon":14}],16:[function(require,module,exports){
 'use strict';
 
 /**

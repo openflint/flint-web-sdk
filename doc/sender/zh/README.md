@@ -1,29 +1,5 @@
 # Sender SDK
 
-## 设备发现
-
-```
-var deviceScanner = new FlintDeviceScanner();
-// 发现新设备
-deviceScanner.on('devicefound', function(device) {
-    // 获取设备名称
-    var name = device.getName();
-    // 获取Flint Service Url
-    var url = device.getUrlBase();
-    // 获取设备唯一ID
-    var uniqueId = device.getUniqueId();
-});
-// 设备离开
-deviceScanner.on('devicegone', function(device) {
-});
-// 开始扫描
-deviceScanner.start();
-// 停止扫描
-deviceScanner.stop();
-// 获取设备列表
-deviceScanner.getDeviceList();
-```
-
 ## 创建FlintSenderManager
 
 ```

@@ -7,8 +7,7 @@ module.exports = (grunt) ->
         browserify:
             sender:
                 files:
-                    'out/sender/chrome/flint_sender_sdk.js': ['lib/sender/chrome/exports.coffee']
-                    'out/sender/firefox/flint_sender_sdk.js': ['lib/sender/firefox/exports.coffee']
+                    'out/sender/common/flint_sender_sdk.js': ['lib/sender/common/exports.coffee']
                     'out/sender/ffos/flint_sender_sdk.js': ['lib/sender/ffos/exports.coffee']
                 options:
                     transform: ['coffeeify']
@@ -21,25 +20,12 @@ module.exports = (grunt) ->
                     transform: ['coffeeify']
                     browserifyOptions:
                         extensions: ['.coffee']
-            discovery:
-                files:
-                    'out/discovery/chrome/flint_discovery.js': ['lib/discovery/chrome/exports.coffee']
-                    'out/discovery/firefox/flint_discovery.js': ['lib/discovery/firefox/exports.coffee']
-                    'out/discovery/ffos/flint_discovery.js': ['lib/discovery/ffos/exports.coffee']
-                options:
-                    transform: ['coffeeify']
-                    browserifyOptions:
-                        extensions: ['.coffee']
 
         uglify:
-            sender_chrome:
+            sender_common:
                 options: { mangle: true, compress: true }
-                src: 'out/sender/chrome/flint_sender_sdk.js'
-                dest: 'out/sender/chrome/flint_sender_sdk.min.js'
-            sender_firefox:
-                options: { mangle: true, compress: true }
-                src: 'out/sender/firefox/flint_sender_sdk.js'
-                dest: 'out/sender/firefox/flint_sender_sdk.min.js'
+                src: 'out/sender/common/flint_sender_sdk.js'
+                dest: 'out/sender/common/flint_sender_sdk.min.js'
             sender_ffos:
                 options: { mangle: true, compress: true }
                 src: 'out/sender/ffos/flint_sender_sdk.js'
@@ -48,46 +34,20 @@ module.exports = (grunt) ->
                 options: { mangle: true, compress: true }
                 src: 'out/flint_receiver_sdk.js'
                 dest: 'out/flint_receiver_sdk.min.js'
-            discovery_chrome:
-                options: { mangle: true, compress: true }
-                src: 'out/discovery/chrome/flint_discovery.js'
-                dest: 'out/discovery/chrome/flint_discovery.min.js'
-            discovery_firefox:
-                options: { mangle: true, compress: true }
-                src: 'out/discovery/firefox/flint_discovery.js'
-                dest: 'out/discovery/firefox/flint_discovery.min.js'
-            discovery_ffos:
-                options: { mangle: true, compress: true }
-                src: 'out/discovery/ffos/flint_discovery.js'
-                dest: 'out/discovery/ffos/flint_discovery.min.js'
 
         concat:
-            sender_chrome:
+            sender_common:
                 options:
                     banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
                         'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/sender/chrome/flint_sender_sdk.js'
-                dest: 'out/sender/chrome/flint_sender_sdk.js'
-            sender_prod_chrome:
+                src: 'out/sender/common/flint_sender_sdk.js'
+                dest: 'out/sender/common/flint_sender_sdk.js'
+            sender_prod_common:
                 options:
                     banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
                         'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/sender/chrome/flint_sender_sdk.min.js'
-                dest: 'out/sender/chrome/flint_sender_sdk.min.js'
-
-            sender_firefox:
-                options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
-                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/sender/firefox/flint_sender_sdk.js'
-                dest: 'out/sender/firefox/flint_sender_sdk.js'
-            sender_prod_firefox:
-                options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
-                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/sender/firefox/flint_sender_sdk.min.js'
-                dest: 'out/sender/firefox/flint_sender_sdk.min.js'
-
+                src: 'out/sender/common/flint_sender_sdk.min.js'
+                dest: 'out/sender/common/flint_sender_sdk.min.js'
             sender_ffos:
                 options:
                     banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
@@ -114,51 +74,6 @@ module.exports = (grunt) ->
                 src: 'out/flint_receiver_sdk.min.js'
                 dest: 'out/flint_receiver_sdk.min.js'
 
-            discovery_chrome:
-                options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
-                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/discovery/chrome/flint_discovery.js'
-                dest: 'out/discovery/chrome/flint_discovery.js'
-            discovery_prod_chrome:
-                options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
-                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/discovery/chrome/flint_discovery.min.js'
-                dest: 'out/discovery/chrome/flint_discovery.min.js'
-            discovery_firefox:
-                options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
-                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/discovery/firefox/flint_discovery.js'
-                dest: 'out/discovery/firefox/flint_discovery.js'
-            discovery_prod_firefox:
-                options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
-                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/discovery/firefox/flint_discovery.min.js'
-                dest: 'out/discovery/firefox/flint_discovery.min.js'
-            discovery_ffos:
-                options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
-                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/discovery/ffos/flint_discovery.js'
-                dest: 'out/discovery/ffos/flint_discovery.js'
-            discovery_prod_ffos:
-                options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
-                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/discovery/ffos/flint_discovery.min.js'
-                dest: 'out/discovery/ffos/flint_discovery.min.js'
-
-
-    # Load the plugin that provides the "coffee" task.
-
-    # Load the plugin that provides the "uglify" task.
-    # grunt.loadNpmTasks 'grunt-contrib-uglify'
-
-    # Default task(s).
-    # grunt.registerTask 'default', ['coffee', 'uglify']
 
     grunt.loadNpmTasks 'grunt-contrib-coffee'
     grunt.loadNpmTasks 'grunt-browserify'
