@@ -3,13 +3,12 @@
 ## use FlintSenderManager
 
 ```
-var senderManager = new FlintSenderManager(
-    appid, // application ID
-    'http://127.0.0.1:9431', // Flint Service url
-    true // keep heartbeat with Flint Service
-    );
-// set Flint Service Url
-senderManager.setServiceUrl(urlBase);
+var senderManager = new FlintSenderManager({
+        appid, // application ID
+        flint-service-url, // http url, means Flint Service url
+        flint-server-host, // ip address, means Flint Server host
+        use-heartbeat // boolean type, means keeping heartbeat with Flint Service or not
+    });
 // get custom additional data from receiver
 senderManager.getAdditionalData();
 // or
@@ -42,13 +41,7 @@ senderManager.on('customDataavailable', function(customData) {
     ```
 
 ## use WebRTC
-* create Peer
-
-    ```
-    var peer = senderManager.createPeer();
-    ```
-
-* connect receiver
+* connect receiver peer
 
     ```
     // data connection

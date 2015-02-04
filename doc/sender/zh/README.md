@@ -3,13 +3,12 @@
 ## 创建FlintSenderManager
 
 ```
-var senderManager = new FlintSenderManager(
-    appid, // application ID
-    'http://127.0.0.1:9431', // Flint Service url
-    true // 是否与Flint Service保持心跳
-    );
-// 设置Flint Service Url， 会覆盖创建FlintSenderManager时传递的Service url
-senderManager.setServiceUrl(urlBase);
+var senderManager = new FlintSenderManager({
+        appid, // application ID
+        flint-service-url, // http url, 表示Flint Service url
+        flint-server-host, // ip地址，表示Flint Server host
+        use-heartbeat // bool型，是否与Flint Service保持心跳
+    });
 // 获取reciever端传递过来的custom additional data
 senderManager.getAdditionalData();
 // or
@@ -47,13 +46,7 @@ sender端与receiver端通过MessageBus进行通信。
     ```
 
 ## 使用WebRTC
-* 创建Peer
-
-    ```
-    var peer = senderManager.createPeer();
-    ```
-
-* 连接receiver
+* 连接receiver peer
 
     ```
     // data connection
