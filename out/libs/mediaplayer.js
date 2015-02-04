@@ -164,6 +164,11 @@ var MediaPlayer = function (manager, videoId) {
     self.load = function (url, videoType, title, subtitle, mediaMetadata) {
         self.mediaMetadata = mediaMetadata;
 
+        // do something when load
+        if ("onloadmedia" in self) {
+           self.onloadmedia(self.mediaMetadata);
+        }
+
         self.status = "LOADDING";
         // var source = document.createElement('source');
         // source.src = url;
