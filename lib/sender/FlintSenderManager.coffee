@@ -19,6 +19,7 @@ SenderMessageChannel = require './SenderMessageChannel'
 SenderMessageBus = require './SenderMessageBus'
 Peer = require '../peerjs/peer'
 FlintConstants = require '../common/FlintConstants'
+Platform = require '../common/Platform'
 
 class FlintSenderManager extends EventEmitter
 
@@ -276,11 +277,12 @@ class FlintSenderManager extends EventEmitter
         else
             xhr.send ''
 
-    #
-    # sub-class need to implement
-    #
     _createXhr: ->
-        throw 'Not Implement'
+        platform = Platform.getPlatform().browser
+        if platform is 'ffos'
+            return new XMLHttpRequest(mozSystem: true)
+        else
+            return new XMLHttpRequest()
 
     _createMessageChannel: ->
         if not @messageChannel

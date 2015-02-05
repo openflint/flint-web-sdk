@@ -7,8 +7,7 @@ module.exports = (grunt) ->
         browserify:
             sender:
                 files:
-                    'out/sender/common/flint_sender_sdk.js': ['lib/sender/common/exports.coffee']
-                    'out/sender/ffos/flint_sender_sdk.js': ['lib/sender/ffos/exports.coffee']
+                    'out/flint_sender_sdk.js': ['lib/sender/exports.coffee']
                 options:
                     transform: ['coffeeify']
                     browserifyOptions:
@@ -22,45 +21,28 @@ module.exports = (grunt) ->
                         extensions: ['.coffee']
 
         uglify:
-            sender_common:
+            sender:
                 options: { mangle: true, compress: true }
-                src: 'out/sender/common/flint_sender_sdk.js'
-                dest: 'out/sender/common/flint_sender_sdk.min.js'
-            sender_ffos:
-                options: { mangle: true, compress: true }
-                src: 'out/sender/ffos/flint_sender_sdk.js'
-                dest: 'out/sender/ffos/flint_sender_sdk.min.js'
+                src: 'out/flint_sender_sdk.js'
+                dest: 'out/flint_sender_sdk.min.js'
             receiver:
                 options: { mangle: true, compress: true }
                 src: 'out/flint_receiver_sdk.js'
                 dest: 'out/flint_receiver_sdk.min.js'
 
         concat:
-            sender_common:
+            sender:
                 options:
                     banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
                         'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/sender/common/flint_sender_sdk.js'
-                dest: 'out/sender/common/flint_sender_sdk.js'
-            sender_prod_common:
+                src: 'out/flint_sender_sdk.js'
+                dest: 'out/flint_sender_sdk.js'
+            sender_prod:
                 options:
                     banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
                         'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/sender/common/flint_sender_sdk.min.js'
-                dest: 'out/sender/common/flint_sender_sdk.min.js'
-            sender_ffos:
-                options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
-                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/sender/ffos/flint_sender_sdk.js'
-                dest: 'out/sender/ffos/flint_sender_sdk.js'
-            sender_prod_ffos:
-                options:
-                    banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, production. ' +
-                        'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
-                src: 'out/sender/ffos/flint_sender_sdk.min.js'
-                dest: 'out/sender/ffos/flint_sender_sdk.min.js'
-
+                src: 'out/flint_sender_sdk.min.js'
+                dest: 'out/flint_sender_sdk.min.js'
             receiver:
                 options:
                     banner: '/*! <%= pkg.name %> build:<%= pkg.version %>, development. ' +
@@ -73,7 +55,6 @@ module.exports = (grunt) ->
                         'Copyright(C) 2013-2014 www.OpenFlint.org */\n'
                 src: 'out/flint_receiver_sdk.min.js'
                 dest: 'out/flint_receiver_sdk.min.js'
-
 
     grunt.loadNpmTasks 'grunt-contrib-coffee'
     grunt.loadNpmTasks 'grunt-browserify'
