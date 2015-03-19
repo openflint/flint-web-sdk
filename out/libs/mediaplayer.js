@@ -96,7 +96,7 @@ var MediaPlayer = function (manager, videoId) {
             var messageData = loadData();
             messageData["requestId"] = self.requestIdLoad;
 
-            self.playerState = messageData.status[0].playerState = "PLAYING";
+            self.playerState = messageData.status[0].playerState = "BUFFERING";
             messageData.status[0].media = {
                 "streamType": self.mediaMetadata.media.streamType,
                 "duration": video.duration,
