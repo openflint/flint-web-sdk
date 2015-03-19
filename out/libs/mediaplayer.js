@@ -85,7 +85,7 @@ var MediaPlayer = function (manager, videoId) {
 
         this.idle = function (idleReason) {
             var messageData = loadData();
-            messageData.status[0].playerState = "IDLE";
+            self.playerState = messageData.status[0].playerState = "IDLE";
             messageData.status[0].idleReason = idleReason;
             messageBus.send(JSON.stringify(messageData), _senderId);
             if (idleReason == "FINISHED") {
@@ -96,7 +96,7 @@ var MediaPlayer = function (manager, videoId) {
             var messageData = loadData();
             messageData["requestId"] = self.requestIdLoad;
 
-            messageData.status[0].playerState = "PLAYING";
+            self.playerState = messageData.status[0].playerState = "PLAYING";
             messageData.status[0].media = {
                 "streamType": self.mediaMetadata.media.streamType,
                 "duration": video.duration,
