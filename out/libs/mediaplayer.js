@@ -127,7 +127,7 @@ var MediaPlayer = function (manager, videoId) {
         };
         this.buffering = function () {
             var messageData = loadData();
-            messageData.status[0].playerState = "BUFFERING";
+            self.playerState = messageData.status[0].playerState = "BUFFERING";
             messageBus.send(JSON.stringify(messageData), _senderId);
         };
 
