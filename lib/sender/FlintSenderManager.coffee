@@ -332,11 +332,13 @@ class FlintSenderManager extends EventEmitter
             host: @host
             port: '9433'
             secure: false
-        if @additionalData['dataPeerId']
-            peer.connect @additionalData['dataPeerId'], options
-        else
-            @.once 'dataPeerId' + 'available', (peerId) =>
-                peer.connect peerId, options
+        peer.on 'open', (peerId) =>
+            console.log 'peer [', peerId, '] opened!!!'
+            if @additionalData['dataPeerId']
+                peer.connect @additionalData['dataPeerId'], options
+            else
+                @.once 'dataPeerId' + 'available', (peerId) =>
+                    peer.connect peerId, options
         return peer
 
     callReceiverMediaPeer: (stream, options) ->
@@ -344,11 +346,13 @@ class FlintSenderManager extends EventEmitter
             host: @host
             port: '9433'
             secure: false
-        if @additionalData['mediaPeerId']
-            peer.call @additionalData['mediaPeerId'], stream, options
-        else
-            @.once 'mediaPeerId' + 'available', (peerId) =>
-                peer.call peerId, stream, options
+        peer.on 'open', (peerId) =>
+            console.log 'peer [', peerId, '] opened!!!'
+            if @additionalData['mediaPeerId']
+                peer.call @additionalData['mediaPeerId'], stream, options
+            else
+                @.once 'mediaPeerId' + 'available', (peerId) =>
+                    peer.call peerId, stream, options
         return peer
 
     _clean: ->
